@@ -18,36 +18,17 @@ import java.util.function.Supplier;
 @SuppressWarnings({"deprecation", "unused"})
 public class WeatheringCopperButtonBlock extends CopperButtonBlock implements WeatheringCopper {
     private final WeatheringCopper.WeatherState weatherState;
-    public static Supplier<BiMap<Block, Block>> NEXT_BY_BLOCK = Suppliers.memoize(() -> ImmutableBiMap.<Block, Block>builder()
-            .put(SMBlocks.COPPER_BUTTON.get(), SMBlocks.EXPOSED_COPPER_BUTTON.get())
-            .put(SMBlocks.EXPOSED_COPPER_BUTTON.get(), SMBlocks.WEATHERED_COPPER_BUTTON.get())
-            .put(SMBlocks.WEATHERED_COPPER_BUTTON.get(), SMBlocks.OXIDIZED_COPPER_BUTTON.get())
-            .build());
 
     public static final Supplier<BiMap<Block, Block>> PREVIOUS_BY_BLOCK = Suppliers.memoize(() -> NEXT_BY_BLOCK.get().inverse());
 
-    public WeatheringCopperButtonBlock(Properties pProperties, BlockSetType pType, int pTicksToStayPressed, boolean pArrowsCanPress, WeatherState weatherState) {
-        super(pProperties, pType, pTicksToStayPressed, pArrowsCanPress);
+    public WeatheringCopperButtonBlock(Properties properties, BlockSetType pType, int pTicksToStayPressed, WeatherState weatherState) {
+        super(properties, pType, pTicksToStayPressed);
         this.weatherState = weatherState;
     }
 
     @Override
     public void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
         this.onRandomTick(state, level, pos, random);
-    }
-
-    @Override
-    public Optional<BlockState> getNext(BlockState state) {
-        return Optional.ofNullable(NEXT_BY_BLOCK.get().get(state.getBlock())).map((block) -> block.withPropertiesOf(state));
-    }
-
-    public static Optional<BlockState> getPrevious(BlockState state) {
-        return Optional.ofNullable(PREVIOUS_BY_BLOCK.get().get(state.getBlock())).map((block) -> block.withPropertiesOf(state));
-    }
-
-    @Override
-    public boolean isRandomlyTicking(BlockState state) {
-        return Optional.ofNullable(NEXT_BY_BLOCK.get().get(state.getBlock())).isPresent();
     }
 
     @Override

@@ -1,15 +1,22 @@
 package com.uraneptus.sullysmod.core.registry;
 
 import com.mojang.datafixers.util.Pair;
+import com.uraneptus.sullysmod.common.blocks.CopperButtonBlock;
+import com.uraneptus.sullysmod.common.blocks.FlingerTotem;
+import com.uraneptus.sullysmod.common.blocks.WeatheringCopperButtonBlock;
+import com.uraneptus.sullysmod.common.blocks.utilities.SMDirectionalBlock;
 import com.uraneptus.sullysmod.core.other.SMProperties;
+import dev.architectury.injectables.annotations.ExpectPlatform;
 import dev.architectury.registry.registries.RegistrySupplier;
 import net.minecraft.core.Direction;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.properties.BlockSetType;
 import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.level.material.MapColor;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,14 +51,14 @@ public class SMBlocks {
     public static final RegistrySupplier<Block> JADE_BRICK_WALL = createBlock("jade_brick_wall", () -> new WallBlock(SMProperties.Blocks.JADE_BLOCKS));
 
     //Copper Buttons
-    public static final RegistrySupplier<Block> COPPER_BUTTON = createBlock("copper_button", () -> new WeatheringCopperButtonBlock(SMProperties.Blocks.COPPER_BUTTONS, SMBlocksetTypes.COPPER_BLOCKSET.get(), 10, true, WeatheringCopper.WeatherState.UNAFFECTED));
-    public static final RegistrySupplier<Block> EXPOSED_COPPER_BUTTON = createBlock("exposed_copper_button", () -> new WeatheringCopperButtonBlock(SMProperties.Blocks.COPPER_BUTTONS, SMBlocksetTypes.COPPER_BLOCKSET.get(), 20, true, WeatheringCopper.WeatherState.EXPOSED));
-    public static final RegistrySupplier<Block> WEATHERED_COPPER_BUTTON = createBlock("weathered_copper_button", () -> new WeatheringCopperButtonBlock(SMProperties.Blocks.COPPER_BUTTONS, SMBlocksetTypes.COPPER_BLOCKSET.get(), 30, true, WeatheringCopper.WeatherState.WEATHERED));
-    public static final RegistrySupplier<Block> OXIDIZED_COPPER_BUTTON = createBlock("oxidized_copper_button", () -> new WeatheringCopperButtonBlock(SMProperties.Blocks.COPPER_BUTTONS, SMBlocksetTypes.COPPER_BLOCKSET.get(), 40, true, WeatheringCopper.WeatherState.OXIDIZED));
-    public static final RegistrySupplier<Block> WAXED_COPPER_BUTTON = createBlock("waxed_copper_button", () -> new CopperButtonBlock(SMProperties.Blocks.COPPER_BUTTONS, SMBlocksetTypes.COPPER_BLOCKSET.get(), 10, true));
-    public static final RegistrySupplier<Block> WAXED_EXPOSED_COPPER_BUTTON = createBlock("waxed_exposed_copper_button", () -> new CopperButtonBlock(SMProperties.Blocks.COPPER_BUTTONS, SMBlocksetTypes.COPPER_BLOCKSET.get(), 20, true));
-    public static final RegistrySupplier<Block> WAXED_WEATHERED_COPPER_BUTTON = createBlock("waxed_weathered_copper_button", () -> new CopperButtonBlock(SMProperties.Blocks.COPPER_BUTTONS, SMBlocksetTypes.COPPER_BLOCKSET.get(), 30, true));
-    public static final RegistrySupplier<Block> WAXED_OXIDIZED_COPPER_BUTTON = createBlock("waxed_oxidized_copper_button", () -> new CopperButtonBlock(SMProperties.Blocks.COPPER_BUTTONS, SMBlocksetTypes.COPPER_BLOCKSET.get(), 40, true));
+    public static final RegistrySupplier<Block> COPPER_BUTTON = createBlock("copper_button", () -> new WeatheringCopperButtonBlock(SMProperties.Blocks.COPPER_BUTTONS, BlockSetType.COPPER, 10, true, WeatheringCopper.WeatherState.UNAFFECTED));
+    public static final RegistrySupplier<Block> EXPOSED_COPPER_BUTTON = createBlock("exposed_copper_button", () -> new WeatheringCopperButtonBlock(SMProperties.Blocks.COPPER_BUTTONS, BlockSetType.COPPER, 20, true, WeatheringCopper.WeatherState.EXPOSED));
+    public static final RegistrySupplier<Block> WEATHERED_COPPER_BUTTON = createBlock("weathered_copper_button", () -> new WeatheringCopperButtonBlock(SMProperties.Blocks.COPPER_BUTTONS, BlockSetType.COPPER, 30, true, WeatheringCopper.WeatherState.WEATHERED));
+    public static final RegistrySupplier<Block> OXIDIZED_COPPER_BUTTON = createBlock("oxidized_copper_button", () -> new WeatheringCopperButtonBlock(SMProperties.Blocks.COPPER_BUTTONS, BlockSetType.COPPER, 40, true, WeatheringCopper.WeatherState.OXIDIZED));
+    public static final RegistrySupplier<Block> WAXED_COPPER_BUTTON = createBlock("waxed_copper_button", () -> new CopperButtonBlock(SMProperties.Blocks.COPPER_BUTTONS, BlockSetType.COPPER, 10));
+    public static final RegistrySupplier<Block> WAXED_EXPOSED_COPPER_BUTTON = createBlock("waxed_exposed_copper_button", () -> new CopperButtonBlock(SMProperties.Blocks.COPPER_BUTTONS, BlockSetType.COPPER, 20));
+    public static final RegistrySupplier<Block> WAXED_WEATHERED_COPPER_BUTTON = createBlock("waxed_weathered_copper_button", () -> new CopperButtonBlock(SMProperties.Blocks.COPPER_BUTTONS, BlockSetType.COPPER, 30));
+    public static final RegistrySupplier<Block> WAXED_OXIDIZED_COPPER_BUTTON = createBlock("waxed_oxidized_copper_button", () -> new CopperButtonBlock(SMProperties.Blocks.COPPER_BUTTONS, BlockSetType.COPPER, 40));
 
     //Amber
     public static final RegistrySupplier<Block> AMBER = createBlock("amber", () -> new AmberBlock(SMProperties.Blocks.AMBER));
@@ -82,11 +89,11 @@ public class SMBlocks {
     public static final RegistrySupplier<Block> PETRIFIED_WOOD = createBlock("petrified_wood", () -> new PetrifiedLog(STRIPPED_PETRIFIED_WOOD, SMProperties.Blocks.petrified().requiresCorrectToolForDrops().mapColor(MapColor.COLOR_BROWN)));
     public static final Pair<RegistrySupplier<BlueprintStandingSignBlock>, RegistrySupplier<BlueprintWallSignBlock>> PETRIFIED_SIGN = createSignBlock("petrified", SMBlocksetTypes.PETRIFIED_WOOD_TYPE.get(), SMProperties.Blocks.PETRIFIED_SIGNS);
     public static final Pair<RegistrySupplier<BlueprintCeilingHangingSignBlock>, RegistrySupplier<BlueprintWallHangingSignBlock>> PETRIFIED_HANGING_SIGN = createHangingSignBlock("petrified", SMBlocksetTypes.PETRIFIED_WOOD_TYPE.get(), SMProperties.Blocks.PETRIFIED_SIGNS);
-    public static final RegistrySupplier<Block> PETRIFIED_PRESSURE_PLATE = createBlock("petrified_pressure_plate", () -> new PressurePlateBlock(PressurePlateBlock.Sensitivity.MOBS, SMProperties.Blocks.PETRIFIED_PRESSURE_PLATE, SMBlocksetTypes.PETRIFIED_BLOCKSET.get()));
+    public static final RegistrySupplier<Block> PETRIFIED_PRESSURE_PLATE = createBlock("petrified_pressure_plate", () -> new PressurePlateBlock(SMProperties.Blocks.PETRIFIED_PRESSURE_PLATE, SMBlocksetTypes.PETRIFIED_BLOCKSET.get()));
     public static final RegistrySupplier<Block> PETRIFIED_TRAPDOOR = createBlock("petrified_trapdoor", () -> new TrapDoorBlock(SMProperties.Blocks.PETRIFIED_TRAPDOOR, SMBlocksetTypes.PETRIFIED_BLOCKSET.get()));
     public static final RegistrySupplier<Block> PETRIFIED_STAIRS = createBlock("petrified_stairs", () -> new StairBlock(() -> PETRIFIED_PLANKS.get().defaultBlockState(), SMProperties.Blocks.petrified().requiresCorrectToolForDrops()));
     public static final RegistrySupplier<Block> PETRIFIED_SLAB = createBlock("petrified_slab", () -> new SlabBlock(SMProperties.Blocks.petrified().requiresCorrectToolForDrops()));
-    public static final RegistrySupplier<Block> PETRIFIED_BUTTON = createBlock("petrified_button", () -> new ButtonBlock(SMProperties.Blocks.PETRIFIED_BUTTON, SMBlocksetTypes.PETRIFIED_BLOCKSET.get(), 20, false));
+    public static final RegistrySupplier<Block> PETRIFIED_BUTTON = createBlock("petrified_button", () -> new ButtonBlock(SMProperties.Blocks.PETRIFIED_BUTTON, SMBlocksetTypes.PETRIFIED_BLOCKSET.get(), 20));
     public static final RegistrySupplier<Block> PETRIFIED_FENCE_GATE = createBlock("petrified_fence_gate", () -> new FenceGateBlock(SMProperties.Blocks.petrified().requiresCorrectToolForDrops().forceSolidOn(), SMBlocksetTypes.PETRIFIED_WOOD_TYPE.get()));
     public static final RegistrySupplier<Block> PETRIFIED_FENCE = createBlock("petrified_fence", () -> new FenceBlock(SMProperties.Blocks.petrified().requiresCorrectToolForDrops()));
     public static final RegistrySupplier<Block> PETRIFIED_DOOR = createBlock("petrified_door", () -> new DoorBlock(SMProperties.Blocks.petrified().requiresCorrectToolForDrops().noOcclusion().strength(0.35F), SMBlocksetTypes.PETRIFIED_BLOCKSET.get()));
@@ -170,4 +177,26 @@ public class SMBlocks {
         AUTO_TRANSLATE.add(block);
         return block;
     }
+
+    public static void init() {
+        registerWaxableWeatheringBlocks(COPPER_BUTTON, EXPOSED_COPPER_BUTTON, WAXED_COPPER_BUTTON);
+        registerWaxableWeatheringBlocks(EXPOSED_COPPER_BUTTON, WEATHERED_COPPER_BUTTON, WAXED_EXPOSED_COPPER_BUTTON);
+        registerWaxableWeatheringBlocks(WEATHERED_COPPER_BUTTON, OXIDIZED_COPPER_BUTTON, WAXED_WEATHERED_COPPER_BUTTON);
+        registerWaxableWeatheringBlocks(OXIDIZED_COPPER_BUTTON, null, WAXED_OXIDIZED_COPPER_BUTTON);
+    }
+
+    public static void registerWaxableWeatheringBlocks(RegistrySupplier<Block> unWaxedBlock, @Nullable RegistrySupplier<Block> weatheredBlock, RegistrySupplier<Block> waxedBlock) {
+        if (weatheredBlock != null) registerWeatheringBlockPair(unWaxedBlock, weatheredBlock);
+        registerWaxableBlockPair(waxedBlock, unWaxedBlock);
+    }
+
+    @ExpectPlatform
+    static void registerWeatheringBlockPair(RegistrySupplier<Block> from, RegistrySupplier<Block> to) {
+        throw new UnsupportedOperationException("This method should be replaced by Architectury");
+    }
+    @ExpectPlatform
+    static void registerWaxableBlockPair(RegistrySupplier<Block> from, RegistrySupplier<Block> to) {
+        throw new UnsupportedOperationException("This method should be replaced by Architectury");
+    }
+}
 }

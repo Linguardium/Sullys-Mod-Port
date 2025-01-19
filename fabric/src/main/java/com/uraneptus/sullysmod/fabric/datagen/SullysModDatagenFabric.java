@@ -28,7 +28,7 @@ public final class SullysModDatagenFabric implements DataGeneratorEntrypoint {
     private static final String SNBTPathProperty = System.getProperty("structure-input-snbt");
 
     public void registerDatagenProviders(FabricDataGenerator.Pack pack) {
-
+        pack.addProvider(SMNeoForgeDataMapProvider::new);
     }
 
     public void registerStructureSerializer(FabricDataGenerator.Pack pack) {
