@@ -1,0 +1,23 @@
+{
+    DataVersion: 3465,
+    size: [3, 3, 3],
+    data: [
+        {pos: [0, 0, 1], state: "minecraft:gravel"},
+        {pos: [0, 0, 2], state: "minecraft:gravel"},
+        {pos: [1, 0, 2], state: "minecraft:air"},
+        {pos: [2, 0, 0], state: "minecraft:gravel"},
+        {pos: [2, 0, 1], state: "minecraft:air"},
+        {pos: [0, 1, 1], state: "minecraft:air"},
+        {pos: [0, 1, 2], state: "sullysmod:petrified_sapling{stage:0}"},
+        {pos: [1, 1, 1], state: "minecraft:air"},
+        {pos: [2, 1, 0], state: "sullysmod:petrified_sapling{stage:0}"},
+        {pos: [0, 2, 0], state: "minecraft:air"},
+        {pos: [2, 2, 0], state: "minecraft:air"}
+    ],
+    entities: [],
+    palette: [
+        "minecraft:gravel",
+        "minecraft:air",
+        "sullysmod:petrified_sapling{stage:0}"
+    ]
+}

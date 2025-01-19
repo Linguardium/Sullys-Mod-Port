@@ -1,0 +1,40 @@
+{
+    DataVersion: 3465,
+    size: [3, 8, 3],
+    data: [
+        {pos: [2, 0, 0], state: "minecraft:gravel"},
+        {pos: [0, 1, 2], state: "minecraft:gravel"},
+        {pos: [2, 1, 0], state: "sullysmod:petrified_log{axis:y}"},
+        {pos: [2, 1, 1], state: "minecraft:gravel"},
+        {pos: [0, 2, 1], state: "minecraft:gravel"},
+        {pos: [0, 2, 2], state: "sullysmod:stripped_petrified_log{axis:y}"},
+        {pos: [1, 2, 1], state: "minecraft:gravel"},
+        {pos: [1, 2, 2], state: "minecraft:gravel"},
+        {pos: [2, 2, 0], state: "sullysmod:petrified_log{axis:y}"},
+        {pos: [2, 2, 1], state: "minecraft:gravel"},
+        {pos: [2, 2, 2], state: "minecraft:air"},
+        {pos: [0, 3, 2], state: "sullysmod:stripped_petrified_log{axis:y}"},
+        {pos: [2, 3, 0], state: "sullysmod:petrified_log{axis:y}"},
+        {pos: [2, 3, 1], state: "minecraft:gravel"},
+        {pos: [2, 3, 2], state: "minecraft:air"},
+        {pos: [0, 4, 2], state: "sullysmod:petrified_log{axis:y}"},
+        {pos: [2, 4, 0], state: "sullysmod:stripped_petrified_log{axis:y}"},
+        {pos: [2, 4, 1], state: "minecraft:air"},
+        {pos: [2, 4, 2], state: "minecraft:air"},
+        {pos: [2, 5, 0], state: "sullysmod:stripped_petrified_log{axis:y}"},
+        {pos: [2, 5, 1], state: "minecraft:air"},
+        {pos: [2, 5, 2], state: "minecraft:air"},
+        {pos: [2, 6, 0], state: "sullysmod:stripped_petrified_log{axis:y}"},
+        {pos: [2, 6, 1], state: "sullysmod:petrified_log{axis:z}"},
+        {pos: [2, 6, 2], state: "sullysmod:petrified_log{axis:z}"},
+        {pos: [2, 7, 0], state: "sullysmod:stripped_petrified_log{axis:y}"}
+    ],
+    entities: [],
+    palette: [
+        "minecraft:gravel",
+        "sullysmod:petrified_log{axis:y}",
+        "sullysmod:stripped_petrified_log{axis:y}",
+        "sullysmod:petrified_log{axis:z}",
+        "minecraft:air"
+    ]
+}

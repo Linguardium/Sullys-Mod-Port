@@ -1,0 +1,37 @@
+modLoader = "javafml"
+loaderVersion = "[4,)"
+#issueTrackerURL = ""
+license="GNU Lesser General Public License v3.0"
+
+[[mods]]
+modId = "sullysmod"
+version = "${version}"
+displayName = "Sully's Mod" #mandatory
+logoFile = "sullysmod_banner.png" #optional
+authors = "Uraneptus, MiteBeMana, KekeCreations, Linguardium" #optional
+credits = "Idea & Assets by GoesBySully" #optional
+description = '''
+Sully's Mod aims to add interesting features while still keeping a vanilla feeling. While the mod's main focus is on entities it tries to add features for every type of minecraft player, explorers, builders, redstone engineers and more.
+'''
+#logoFile = ""
+
+[[dependencies.sullysmod]]
+modId = "neoforge"
+type = "required"
+versionRange = "[21.4,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.sullysmod]]
+modId = "minecraft"
+type = "required"
+versionRange = "[1.21.4,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[mixins]]
+config = "sullysmod.mixins.json"
+
+[modproperties.sullysmod]
+catalogueImageIcon = "sullysmod_icon.png"
+configuredBackground = "sullysmod:textures/block/jade_bricks.png"

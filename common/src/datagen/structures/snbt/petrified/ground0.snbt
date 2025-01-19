@@ -1,0 +1,13 @@
+{
+    DataVersion: 3465,
+    size: [1, 2, 1],
+    data: [
+        {pos: [0, 0, 0], state: "minecraft:gravel"},
+        {pos: [0, 1, 0], state: "sullysmod:petrified_sapling{stage:0}"}
+    ],
+    entities: [],
+    palette: [
+        "minecraft:gravel",
+        "sullysmod:petrified_sapling{stage:0}"
+    ]
+}

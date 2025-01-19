@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "sullysmod",
+  "version": "${version}",
+  "name": "Sully's Mod",
+  "description": "Sully's Mod aims to add interesting features while still keeping a vanilla feeling. While the mod's main focus is on entities it tries to add features for every type of minecraft player, explorers, builders, redstone engineers and more.",
+  "authors": [
+    "Me!"
+  ],
+  "contact": {
+    "homepage": "https://fabricmc.net/",
+    "sources": "https://github.com/FabricMC/fabric-example-mod"
+  },
+  "license": "LGPL3.0",
+  "icon": "sullysmod_icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.uraneptus.sullysmod.fabric.SullysModFabric"
+    ],
+    "client": [
+      "com.uraneptus.sullysmod.fabric.client.SullysModFabricClient"
+    ],
+    "fabric-datagen": [
+      "com.uraneptus.sullysmod.fabric.datagen.SullysModDatagenFabric"
+    ]
+  },
+  "mixins": [
+    "sullysmod.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.16.10",
+    "minecraft": "~1.21.4",
+    "java": ">=21",
+    "fabric-api": "*"
+  },
+  "suggests": {
+    "another-mod": "*"
+  }
+}
