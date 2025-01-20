@@ -49,7 +49,6 @@ public class ItemStandBlock extends SMDirectionalBlock implements EntityBlock {
         }else {
             return InteractionResult.TRY_WITH_EMPTY_HAND;
         }
-        return super.useItemOn(itemInHand, blockState, level, blockPos, player, interactionHand, blockHitResult);
     }
 
     @Override

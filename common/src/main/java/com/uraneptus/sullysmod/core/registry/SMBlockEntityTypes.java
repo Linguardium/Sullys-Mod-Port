@@ -41,4 +41,6 @@ public class SMBlockEntityTypes {
     public static <T extends BlockEntity> RegistrySupplier<BlockEntityType<T>> registerBE(String name, BlockEntityType.BlockEntitySupplier<? extends T> blockEntity, Class<? extends Block> blockClass) {
         return BLOCK_ENTITY_TYPES.register(location(name), () -> BlockEntityTypeHelper.createBlockEntityType(blockEntity, Sets.newHashSet(collectBlocks(blockClass))));
     }
+
+    public static void init() { }
 }
