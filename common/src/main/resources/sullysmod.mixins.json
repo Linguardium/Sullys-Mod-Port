@@ -1,11 +1,13 @@
 {
   "required": true,
-  "package": "com.uraneptus.sullysmod.mixin",
+  "package": "com.uraneptus.sullysmod.mixins",
   "compatibilityLevel": "JAVA_21",
   "minVersion": "0.8",
   "client": [
   ],
   "mixins": [
+    "BlockSetTypeHelper",
+    "WoodTypeHelper"
   ],
   "injectors": {
     "defaultRequire": 1

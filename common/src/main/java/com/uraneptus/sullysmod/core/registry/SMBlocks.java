@@ -1,9 +1,7 @@
 package com.uraneptus.sullysmod.core.registry;
 
 import com.mojang.datafixers.util.Pair;
-import com.uraneptus.sullysmod.common.blocks.CopperButtonBlock;
-import com.uraneptus.sullysmod.common.blocks.FlingerTotem;
-import com.uraneptus.sullysmod.common.blocks.WeatheringCopperButtonBlock;
+import com.uraneptus.sullysmod.common.blocks.*;
 import com.uraneptus.sullysmod.common.blocks.utilities.SMDirectionalBlock;
 import com.uraneptus.sullysmod.core.other.SMProperties;
 import dev.architectury.injectables.annotations.ExpectPlatform;
@@ -51,10 +49,10 @@ public class SMBlocks {
     public static final RegistrySupplier<Block> JADE_BRICK_WALL = createBlock("jade_brick_wall", () -> new WallBlock(SMProperties.Blocks.JADE_BLOCKS));
 
     //Copper Buttons
-    public static final RegistrySupplier<Block> COPPER_BUTTON = createBlock("copper_button", () -> new WeatheringCopperButtonBlock(SMProperties.Blocks.COPPER_BUTTONS, BlockSetType.COPPER, 10, true, WeatheringCopper.WeatherState.UNAFFECTED));
-    public static final RegistrySupplier<Block> EXPOSED_COPPER_BUTTON = createBlock("exposed_copper_button", () -> new WeatheringCopperButtonBlock(SMProperties.Blocks.COPPER_BUTTONS, BlockSetType.COPPER, 20, true, WeatheringCopper.WeatherState.EXPOSED));
-    public static final RegistrySupplier<Block> WEATHERED_COPPER_BUTTON = createBlock("weathered_copper_button", () -> new WeatheringCopperButtonBlock(SMProperties.Blocks.COPPER_BUTTONS, BlockSetType.COPPER, 30, true, WeatheringCopper.WeatherState.WEATHERED));
-    public static final RegistrySupplier<Block> OXIDIZED_COPPER_BUTTON = createBlock("oxidized_copper_button", () -> new WeatheringCopperButtonBlock(SMProperties.Blocks.COPPER_BUTTONS, BlockSetType.COPPER, 40, true, WeatheringCopper.WeatherState.OXIDIZED));
+    public static final RegistrySupplier<Block> COPPER_BUTTON = createBlock("copper_button", () -> new WeatheringCopperButtonBlock(SMProperties.Blocks.COPPER_BUTTONS, BlockSetType.COPPER, 10, WeatheringCopper.WeatherState.UNAFFECTED));
+    public static final RegistrySupplier<Block> EXPOSED_COPPER_BUTTON = createBlock("exposed_copper_button", () -> new WeatheringCopperButtonBlock(SMProperties.Blocks.COPPER_BUTTONS, BlockSetType.COPPER, 20, WeatheringCopper.WeatherState.EXPOSED));
+    public static final RegistrySupplier<Block> WEATHERED_COPPER_BUTTON = createBlock("weathered_copper_button", () -> new WeatheringCopperButtonBlock(SMProperties.Blocks.COPPER_BUTTONS, BlockSetType.COPPER, 30, WeatheringCopper.WeatherState.WEATHERED));
+    public static final RegistrySupplier<Block> OXIDIZED_COPPER_BUTTON = createBlock("oxidized_copper_button", () -> new WeatheringCopperButtonBlock(SMProperties.Blocks.COPPER_BUTTONS, BlockSetType.COPPER, 40, WeatheringCopper.WeatherState.OXIDIZED));
     public static final RegistrySupplier<Block> WAXED_COPPER_BUTTON = createBlock("waxed_copper_button", () -> new CopperButtonBlock(SMProperties.Blocks.COPPER_BUTTONS, BlockSetType.COPPER, 10));
     public static final RegistrySupplier<Block> WAXED_EXPOSED_COPPER_BUTTON = createBlock("waxed_exposed_copper_button", () -> new CopperButtonBlock(SMProperties.Blocks.COPPER_BUTTONS, BlockSetType.COPPER, 20));
     public static final RegistrySupplier<Block> WAXED_WEATHERED_COPPER_BUTTON = createBlock("waxed_weathered_copper_button", () -> new CopperButtonBlock(SMProperties.Blocks.COPPER_BUTTONS, BlockSetType.COPPER, 30));
