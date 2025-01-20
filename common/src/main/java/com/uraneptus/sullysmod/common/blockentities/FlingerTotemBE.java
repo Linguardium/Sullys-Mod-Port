@@ -6,9 +6,11 @@ import com.uraneptus.sullysmod.core.registry.SMSounds;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.Level;
@@ -17,7 +19,6 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 
-import javax.annotation.Nonnull;
 import java.util.Iterator;
 import java.util.List;
 
@@ -65,7 +66,7 @@ public class FlingerTotemBE extends BlockEntity {
         if (!pLevel.getBlockState(blockpos).getCollisionShape(pLevel, blockpos).isEmpty()) {
             return false;
         } else {
-            Projectile projectile = (Projectile) EntityType.loadEntityRecursive(compoundtag, pLevel, entity -> entity);
+            Projectile projectile = (Projectile) EntityType.loadEntityRecursive(compoundtag, pLevel, EntitySpawnReason.LOAD, entity -> entity);
             if (projectile != null) {
                 projectile.moveTo(pPos.getX() + 0.5 + front.getStepX(), pPos.getY() + 0.5F + front.getStepY(), pPos.getZ() + 0.5 + front.getStepZ());
                 projectile.shoot(front.getStepX(), front.getStepY(), front.getStepZ(), (float) projectile.getDeltaMovement().length(), 0.0F);
@@ -83,12 +84,10 @@ public class FlingerTotemBE extends BlockEntity {
         FlingerTotemBE.ProjectileData projectileData;
         for(Iterator<FlingerTotemBE.ProjectileData> iterator = pBlockEntity.stored.iterator(); iterator.hasNext(); projectileData.delayTicks--) {
             projectileData = iterator.next();
-            if (projectileData.delayTicks <= 0) {
-                if (outputProjectile(pLevel, pPos, pState, projectileData)) {
-                    flag = true;
-                    iterator.remove();
-                }
-
+            if (projectileData.delayTicks > 0) continue;
+            if (outputProjectile(pLevel, pPos, pState, projectileData)) {
+                flag = true;
+                iterator.remove();
             }
         }
 
@@ -112,17 +111,16 @@ public class FlingerTotemBE extends BlockEntity {
         return this.stored.size() == 5;
     }
 
-    @Nonnull
     @Override
     public BlockEntityType<?> getType() {
         return SMBlockEntityTypes.FLINGER_TOTEM.get();
     }
 
     @Override
-    public void load(CompoundTag pTag) {
-        super.load(pTag);
+    public void loadAdditional(CompoundTag pTag,HolderLookup.Provider provider) {
+        super.loadAdditional(pTag,provider);
         ListTag listtag = pTag.getList("Projectiles", 10);
-
+        // TODO: use component and CustomData
         for(int i = 0; i < listtag.size(); ++i) {
             CompoundTag compoundtag = listtag.getCompound(i);
             FlingerTotemBE.ProjectileData projectileData = new FlingerTotemBE.ProjectileData(compoundtag.getCompound("EntityData"), compoundtag.getInt("DelayTicks"));
@@ -131,8 +129,8 @@ public class FlingerTotemBE extends BlockEntity {
     }
 
     @Override
-    protected void saveAdditional(CompoundTag pTag) {
-        super.saveAdditional(pTag);
+    protected void saveAdditional(CompoundTag pTag, HolderLookup.Provider provider) {
+        super.saveAdditional(pTag, provider);
         pTag.put("Projectiles", this.writeProjectiles());
     }
 

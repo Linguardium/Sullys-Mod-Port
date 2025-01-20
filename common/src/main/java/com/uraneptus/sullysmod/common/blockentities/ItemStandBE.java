@@ -2,6 +2,7 @@ package com.uraneptus.sullysmod.common.blockentities;
 
 import com.uraneptus.sullysmod.core.registry.SMBlockEntityTypes;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -11,8 +12,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
-import javax.annotation.Nonnull;
-
 public class ItemStandBE extends BlockEntity {
     ItemStack displayItem = ItemStack.EMPTY;
 
@@ -21,28 +20,23 @@ public class ItemStandBE extends BlockEntity {
     }
 
     @Override
-    public void load(CompoundTag pTag) {
-        super.load(pTag);
-        this.setDisplayItem(ItemStack.of(pTag.getCompound("DisplayItem")));
+    public void loadAdditional(CompoundTag pTag, HolderLookup.Provider provider) {
+        super.loadAdditional(pTag, provider);
+        this.setDisplayItem(ItemStack.parse(provider, pTag.getCompound("DisplayItem")).orElse(ItemStack.EMPTY));
     }
 
     @Override
-    protected void saveAdditional(CompoundTag pTag) {
-        super.saveAdditional(pTag);
+    protected void saveAdditional(CompoundTag pTag, HolderLookup.Provider provider) {
+        super.saveAdditional(pTag, provider);
         if (!this.getDisplayItem().isEmpty()) {
-            pTag.put("DisplayItem", this.getDisplayItem().save(new CompoundTag()));
+            pTag.put("DisplayItem", this.getDisplayItem().save(provider, new CompoundTag()));
         }
 
     }
 
     @Override
-    public CompoundTag getUpdateTag() {
-        CompoundTag tag = new CompoundTag();
-        if (!this.getDisplayItem().isEmpty()) {
-            tag.put("DisplayItem", this.getDisplayItem().save(new CompoundTag()));
-        }
-
-        return tag;
+    public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
+        return saveCustomOnly(provider);
     }
 
     @Override
@@ -58,7 +52,6 @@ public class ItemStandBE extends BlockEntity {
         this.displayItem = item;
     }
 
-    @Nonnull
     @Override
     public BlockEntityType<?> getType() {
         return SMBlockEntityTypes.ITEM_STAND.get();

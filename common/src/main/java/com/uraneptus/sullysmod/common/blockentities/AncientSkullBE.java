@@ -7,7 +7,6 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
-import javax.annotation.Nonnull;
 import java.util.HashSet;
 
 public class AncientSkullBE extends SkullBlockEntity {
@@ -17,7 +16,6 @@ public class AncientSkullBE extends SkullBlockEntity {
         super(pPos, pBlockState);
     }
 
-    @Nonnull
     @Override
     public BlockEntityType<?> getType() {
         return SMBlockEntityTypes.ANCIENT_SKULL.get();
