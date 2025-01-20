@@ -1,5 +1,6 @@
 package com.uraneptus.sullysmod.common.blocks;
 
+import com.uraneptus.sullysmod.common.blockentities.AmberBE;
 import com.uraneptus.sullysmod.common.blocks.utilities.AmberUtil;
 import com.uraneptus.sullysmod.core.registry.SMBlocks;
 import net.minecraft.core.BlockPos;
@@ -10,10 +11,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -27,6 +25,7 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.EntityCollisionContext;
@@ -72,7 +71,7 @@ public class AmberBlock extends Block implements EntityBlock {
     @Override
     public VoxelShape getCollisionShape(BlockState state, BlockGetter pLevel, BlockPos pos, CollisionContext pContext) {
         if (!(pLevel.getBlockEntity(pos) instanceof AmberBE amber)) return Shapes.block();
-        if !((pContext instanceof EntityCollisionContext entitycollisioncontext)) return Shapes.block();
+        if (!(pContext instanceof EntityCollisionContext entitycollisioncontext)) return Shapes.block();
         Entity entity = entitycollisioncontext.getEntity();
 
         if (entity == null || entity instanceof Projectile) return Shapes.block();
@@ -100,6 +99,7 @@ public class AmberBlock extends Block implements EntityBlock {
             if (!neighborState.is(SMBlocks.AMBER.get())) continue;
             if (!(pLevel.getBlockEntity(neighborPos) instanceof AmberBE amberBE) || !amberBE.hasStuckEntity()) continue;
             CompoundTag compoundtag = amberBE.getEntityStuck();
+            Entity entityLoaded = EntityType.loadEntityRecursive(compoundtag,level, EntitySpawnReason.EVENT, loadedEntity->loadedEntity);
             if (entityLoaded != null) {
                 if (entityLoaded.getBoundingBox().getYsize() > 1.5F && entityLoaded.getBoundingBox().getYsize() < 2F && neighborPos.equals(pos.offset(0, -1, 0))) {
                     shouldMeltFlag = false;
@@ -113,60 +113,57 @@ public class AmberBlock extends Block implements EntityBlock {
         return shouldMeltFlag?AmberUtil.MELTING_COLLISION_SHAPE:Shapes.block();
     }
 
-    public void onRemove(BlockState blockState, Level pLevel, BlockPos blockPos, BlockState pNewState, boolean pIsMoving) {
-        if (blockState.getBlock() == SMBlocks.AMBER.get()) {
-            BlockEntity blockEntity = pLevel.getBlockEntity(blockPos);
-            if (blockEntity instanceof AmberBE amberBlockEntity) {
-                if (amberBlockEntity.hasStuckEntity()) {
-                    CompoundTag compoundtag = amberBlockEntity.getEntityStuck();
-                    AmberBE.removeIgnoredNBT(compoundtag);
-                    Entity entity = EntityType.loadEntityRecursive(compoundtag, pLevel, entityLoaded -> entityLoaded);
-                    if (entity != null) {
-                        SMEntityCap.getCapOptional(entity).ifPresent(cap -> {
-                            cap.stuckInAmber = false;
-                        });
-                        SMPacketHandler.sendMsg(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity), new MsgEntityAmberStuck(entity, false));
-                        if (entity instanceof ItemEntity) {
-                            entity.setDeltaMovement(0, 0, 0);
-                        }
-                        entity.moveTo(blockPos.getX() + 0.5, blockPos.getY(), blockPos.getZ() + 0.5);
-                        pLevel.addFreshEntity(entity);
-                    }
-                }
-                for (BlockPos pos : BlockPos.betweenClosed(blockPos.offset(0, -1, 0), blockPos.offset(0, -2, 0))) {
-                    BlockState state = pLevel.getBlockState(pos);
-                    BlockEntity be = pLevel.getBlockEntity(pos);
-                    if (state.is(SMBlocks.AMBER.get())) {
-                        if (be instanceof AmberBE amberBE && amberBE.hasStuckEntity()) {
-                            CompoundTag compoundtag = amberBE.getEntityStuck();
-                            AmberBE.removeIgnoredNBT(compoundtag);
-                            Entity entity = EntityType.loadEntityRecursive(compoundtag, pLevel, entityStuck -> entityStuck);
-                            if (entity != null) {
-                                SMEntityCap.getCapOptional(entity).ifPresent(cap -> {
-                                    cap.stuckInAmber = false;
-                                });
-                                SMPacketHandler.sendMsg(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity), new MsgEntityAmberStuck(entity, false));
-                                if (entity.getBoundingBox().getYsize() > 1.5F && entity.getBoundingBox().getYsize() < 2F && pos.equals(blockPos.offset(0, -1, 0))) {
-                                    pLevel.setBlock(pos, blockState.setValue(IS_MELTED, false), Block.UPDATE_ALL);
-                                    entity.moveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
-                                    pLevel.addFreshEntity(entity);
-                                    amberBE.setStuckEntityData(null);
-
-                                }
-                                else if (entity.getBoundingBox().getYsize() >= 2F && entity.getBoundingBox().getYsize() < 3.5F) {
-                                    pLevel.setBlock(pos, blockState.setValue(IS_MELTED, false), Block.UPDATE_ALL);
-                                    entity.moveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
-                                    pLevel.addFreshEntity(entity);
-                                    amberBE.setStuckEntityData(null);
-
-                                }
-
-                            }
-                        }
-                    }
-                }
-            }
+    private void releaseStuckEntity(Level pLevel, BlockPos blockPos) {
+        if (pLevel.getBlockEntity(blockPos) instanceof AmberBE amberBlockEntity) {
+            amberBlockEntity.releaseEntity(pLevel, blockPos);
         }
+    }
+
+    @Override
+    protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, @Nullable Orientation orientation, boolean bl) {
+        super.neighborChanged(blockState, level, blockPos, block, orientation, bl);
+        // TODO: handle stuck entities and melting state
+    }
+
+    public void onRemove(BlockState blockState, Level pLevel, BlockPos blockPos, BlockState pNewState, boolean pIsMoving) {
+        if (pNewState.is(blockState.getBlock())) return;
+        if (blockState.getBlock() != SMBlocks.AMBER.get()) return;
+        releaseStuckEntity(pLevel, blockPos);
+//        if (pLevel.getBlockEntity(blockPos) instanceof AmberBE amberBlockEntity) {
+            // belongs in a neighbor update?
+//            for (BlockPos pos : BlockPos.betweenClosed(blockPos.offset(0, -1, 0), blockPos.offset(0, -2, 0))) {
+//                BlockState state = pLevel.getBlockState(pos);
+//                BlockEntity be = pLevel.getBlockEntity(pos);
+//                if (state.is(SMBlocks.AMBER.get())) {
+//                    if (be instanceof AmberBE amberBE && amberBE.hasStuckEntity()) {
+//                        CompoundTag compoundtag = amberBE.getEntityStuck();
+//                        AmberBE.removeIgnoredNBT(compoundtag);
+//                        Entity entity = EntityType.loadEntityRecursive(compoundtag, pLevel, entityStuck -> entityStuck);
+//                        if (entity != null) {
+//                            SMEntityCap.getCapOptional(entity).ifPresent(cap -> {
+//                                cap.stuckInAmber = false;
+//                            });
+//                            SMPacketHandler.sendMsg(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity), new MsgEntityAmberStuck(entity, false));
+//                            if (entity.getBoundingBox().getYsize() > 1.5F && entity.getBoundingBox().getYsize() < 2F && pos.equals(blockPos.offset(0, -1, 0))) {
+//                                pLevel.setBlock(pos, blockState.setValue(IS_MELTED, false), Block.UPDATE_ALL);
+//                                entity.moveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
+//                                pLevel.addFreshEntity(entity);
+//                                amberBE.setStuckEntityData(null);
+//
+//                            }
+//                            else if (entity.getBoundingBox().getYsize() >= 2F && entity.getBoundingBox().getYsize() < 3.5F) {
+//                                pLevel.setBlock(pos, blockState.setValue(IS_MELTED, false), Block.UPDATE_ALL);
+//                                entity.moveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
+//                                pLevel.addFreshEntity(entity);
+//                                amberBE.setStuckEntityData(null);
+//
+//                            }
+//
+//                        }
+//                    }
+//                }
+//            }
+//        }
         super.onRemove(blockState, pLevel, blockPos, pNewState, pIsMoving);
     }
 

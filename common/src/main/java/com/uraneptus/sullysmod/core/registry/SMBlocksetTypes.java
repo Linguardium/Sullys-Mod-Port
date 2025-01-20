@@ -5,7 +5,6 @@ import com.uraneptus.sullysmod.mixins.BlockSetTypeHelper;
 import com.uraneptus.sullysmod.mixins.WoodTypeHelper;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.level.block.PressurePlateBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.properties.BlockSetType;
 import net.minecraft.world.level.block.state.properties.WoodType;
