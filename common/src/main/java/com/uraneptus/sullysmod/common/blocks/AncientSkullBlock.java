@@ -2,9 +2,12 @@ package com.uraneptus.sullysmod.common.blocks;
 
 import com.uraneptus.sullysmod.common.blockentities.AncientSkullBE;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.block.SkullBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+
+import java.util.Locale;
 
 public class AncientSkullBlock extends SkullBlock {
 
@@ -22,16 +25,25 @@ public class AncientSkullBlock extends SkullBlock {
         return (Types) this.getType();
     }
 
-    public enum Types implements SkullBlock.Type {
-        CRACKED,
-        CRESTED,
-        FLATBILLED,
-        GIGANTIC,
-        HORNED,
-        LONG,
-        TINY,
-        WIDE,
-        RIBBED,
-        UNICORN
+    public enum Types implements SkullBlock.Type, StringRepresentable {
+        CRACKED(),
+        CRESTED(),
+        FLATBILLED(),
+        GIGANTIC(),
+        HORNED(),
+        LONG(),
+        TINY(),
+        WIDE(),
+        RIBBED(),
+        UNICORN();
+
+        Types() {
+            TYPES.put(getSerializedName(), this);
+        }
+
+        @Override
+        public String getSerializedName() {
+            return this.name().toLowerCase(Locale.ROOT);
+        }
     }
 }

@@ -1,6 +1,5 @@
 package com.uraneptus.sullysmod.common.blocks;
 
-import com.google.common.collect.ImmutableMap;
 import com.uraneptus.sullysmod.common.blocks.utilities.AmberUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -9,26 +8,21 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.WallBlock;
+import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-import java.util.Map;
+import java.util.function.Supplier;
 
-public class AmberWallBlock extends WallBlock {
+public class AmberStairBlock extends StairBlock {
     public static final BooleanProperty IS_MELTED = AmberUtil.IS_MELTED;
 
-    public AmberWallBlock(Properties pProperties) {
-        super(pProperties);
-        this.registerDefaultState(this.defaultBlockState().setValue(IS_MELTED, false));
-
-        Map<BlockState, VoxelShape> shapeMap = this.shapeByIndex;
-        this.shapeByIndex = fixShapeMap(shapeMap);
-        Map<BlockState, VoxelShape> collisionMap = this.collisionShapeByIndex;
-        this.collisionShapeByIndex = fixShapeMap(collisionMap);
+    public AmberStairBlock(Supplier<BlockState> pBaseState, Properties pProperties) {
+        super(pBaseState.get(), pProperties);
+        this.registerDefaultState(this.stateDefinition.any().setValue(IS_MELTED, false));
     }
 
     @Override
@@ -41,7 +35,6 @@ public class AmberWallBlock extends WallBlock {
         AmberUtil.fillCauldronBehavior(pState, pLevel, pPos);
     }
 
-    @Override
     public VoxelShape getCollisionShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
         return AmberUtil.basicCollisionShapeUpdate(super.getCollisionShape(pState, pLevel, pPos, pContext), pState, pLevel, pPos, pContext);
     }
@@ -51,18 +44,8 @@ public class AmberWallBlock extends WallBlock {
         AmberUtil.basicEntityInsideBehavior(this, pState, pLevel, pPos, pEntity);
     }
 
-    @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
         super.createBlockStateDefinition(pBuilder);
         pBuilder.add(IS_MELTED);
-    }
-
-    private static Map<BlockState, VoxelShape> fixShapeMap(Map<BlockState, VoxelShape> map) {
-        ImmutableMap.Builder<BlockState, VoxelShape> builder = ImmutableMap.builder();
-        builder.putAll(map);
-        for (BlockState state : map.keySet()) {
-            builder.put(state.cycle(IS_MELTED), map.get(state));
-        }
-        return builder.build();
     }
 }

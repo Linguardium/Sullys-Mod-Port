@@ -13,7 +13,8 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -36,7 +37,7 @@ public class FlingerTotem extends SMDirectionalBlock implements EntityBlock {
         super(properties);
         this.registerDefaultState(this.stateDefinition.any().setValue(HONEY_AMOUNT, 0));
     }
-
+    // TODO: set up tags for honeycombs and shears
     @Override
     public @NotNull InteractionResult useItemOn(ItemStack itemInHand, BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
        if (itemInHand.is(HONEYCOMBS) && blockState.getValue(HONEY_AMOUNT) < 4) {

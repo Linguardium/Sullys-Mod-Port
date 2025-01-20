@@ -14,8 +14,7 @@ public class SMDirectionalBlock extends HorizontalDirectionalBlock {
     private static final MapCodec<SMDirectionalBlock> CODEC = simpleCodec(SMDirectionalBlock::new);
     public SMDirectionalBlock(Properties properties) {
         super(properties);
-        this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
-
+        this.registerDefaultState(this.stateDefinition.any().setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.NORTH));
     }
 
     @Override
@@ -25,11 +24,12 @@ public class SMDirectionalBlock extends HorizontalDirectionalBlock {
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOposite());
+        return this.defaultBlockState().setValue(BlockStateProperties.HORIZONTAL_FACING, context.getHorizontalDirection().getOpposite());
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> stateBuilder) {
-        stateBuilder.add(FACING);
+        super.createBlockStateDefinition(stateBuilder);
+        stateBuilder.add(BlockStateProperties.HORIZONTAL_FACING);
     }
 }

@@ -8,6 +8,8 @@
   "mixins": [
     "BlockEntityTypeHelper",
     "BlockSetTypeHelper",
+    "EggBlockExtension",
+    "WallBlockAccessor",
     "WoodTypeHelper"
   ],
   "injectors": {
