@@ -47,6 +47,8 @@ public class SMTagUtil {
         return TagKey.create(Registries.MOB_EFFECT, ResourceLocation.fromNamespaceAndPath(namespace, path));
     }
 
-
+    public static <T> TagKey<T> subGroup(TagKey<T> tag, String subGroup) {
+        return TagKey.create(tag.registry(), tag.location().withSuffix("/"+subGroup));
+    }
 
 }

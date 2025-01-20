@@ -5,6 +5,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.LootTable;
 
@@ -16,9 +17,13 @@ public class SMLocationUtil {
     public static ResourceLocation location(String id) {
         return ResourceLocation.fromNamespaceAndPath(MOD_ID, id);
     }
-    public static <T> ResourceKey<T> key(ResourceKey<Registry<T>> registry, String id) {
+    public static <T> ResourceKey<T> key(ResourceKey<? extends Registry<T>> registry, String id) {
         return ResourceKey.create(registry,location(id));
     }
+    public static ResourceKey<LootTable> lootTableKey(ResourceLocation id) {
+        return ResourceKey.create(Registries.LOOT_TABLE, id);
+    }
+
     public static ResourceKey<LootTable> lootTableFromBlockKey(ResourceKey<? extends Block> key) {
         String path = key.location().withPrefix("block/").getPath();
         return key(Registries.LOOT_TABLE, path);
@@ -27,5 +32,7 @@ public class SMLocationUtil {
         String path = block.getKey().location().withPrefix("block/").getPath();
         return Optional.of(key(Registries.LOOT_TABLE, path));
     }
-
+    public static ResourceKey<DamageType> damageTypeKey(String damageTypeId) {
+        return key(Registries.DAMAGE_TYPE, damageTypeId);
+    }
 }

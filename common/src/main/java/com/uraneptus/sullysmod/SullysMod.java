@@ -14,7 +14,9 @@ public final class SullysMod {
         SMBlockEntityTypes.init();
         SMSounds.init();
         SMBlocks.init();
+        SMFluids.init();
 
+        SMBlocks.registerCauldronBlocks();
         // Write common init code here.
     }
 }

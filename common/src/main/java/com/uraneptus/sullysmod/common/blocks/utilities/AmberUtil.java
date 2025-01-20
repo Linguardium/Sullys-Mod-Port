@@ -4,6 +4,8 @@ import com.google.common.base.Suppliers;
 import com.uraneptus.sullysmod.common.blocks.AmberLayeredCauldronBlock;
 import com.uraneptus.sullysmod.core.other.tags.SMBlockTags;
 import com.uraneptus.sullysmod.core.registry.SMBlocks;
+import com.uraneptus.sullysmod.core.registry.SMFluids;
+import com.uraneptus.sullysmod.core.registry.SMItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.cauldron.CauldronInteraction;
@@ -19,37 +21,31 @@ import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LightLayer;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.LayeredCauldronBlock;
-import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.phys.shapes.*;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.EntityCollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
-import java.util.Optional;
-import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import static com.uraneptus.sullysmod.mixins.PointedDripstoneDrippingLogic.findFillableCauldronBelow;
 import static net.minecraft.core.cauldron.CauldronInteraction.emptyBucket;
 import static net.minecraft.core.cauldron.CauldronInteraction.fillBucket;
 
 public class AmberUtil {
-    public static final BooleanProperty IS_MELTED = BooleanProperty.create("is_melted");
     public static final VoxelShape MELTING_COLLISION_SHAPE = Shapes.box(0.0D, 0.0D, 0.0D, 1.0D, 0.0F, 1.0D);
     public static final Predicate<BlockState> AMBER_MELTING_BLOCKS = (blockstate) -> blockstate.is(SMBlockTags.MELTS_AMBER) && blockstate.getLightEmission() >= 3;
 
@@ -76,7 +72,7 @@ public class AmberUtil {
                 .anyMatch(pos-> {
                     BlockState neighborState = level.getBlockState(pos);
                     return AmberUtil.AMBER_MELTING_BLOCKS.test(neighborState) ||
-                            (neighborState.getOptionalValue(IS_MELTED).orElse(false) && level.getBrightness(LightLayer.BLOCK, pos.above()) >= 9)
+                            (neighborState.getOptionalValue(IS_MELTED).orElse(false) && level.getBrightness(LightLayer.BLOCK, pos.above()) >= 9);
                 });
         if (shouldMelt) return meltedBlockState;
         return blockState;
@@ -111,69 +107,79 @@ public class AmberUtil {
 
     }
 
-    public static void fillCauldronBehavior(BlockState amberState, ServerLevel pLevel, BlockPos pos) {
-        if (!amberState.getValue(IS_MELTED)) return;
+    // Deviates enough from vanilla to warrant its own method for now. May move to dripstone logic
+    // anyway.
+    public static void fillCauldronBehavior(BlockState amberState, ServerLevel level, BlockPos blockPos) {
+        if (!amberState.hasProperty(IS_MELTED) || !amberState.getValue(IS_MELTED)) return;
 
-        BlockPos cauldronPos = findFillableCauldronBelow(pLevel, pos);
+        BlockPos cauldronPos = findFillableCauldronBelow(level, blockPos, SMFluids.SOURCE_MOLTEN_AMBER);
         if (cauldronPos == null) return;
 
-        BlockState cauldronState = pLevel.getBlockState(cauldronPos);
+        BlockState cauldronState = level.getBlockState(cauldronPos);
+        if (!(cauldronState.getBlock() instanceof AbstractCauldronBlock cauldronBlock)) return;
+        if (cauldronBlock.isFull(cauldronState)) return;
+
+        // TODO: handle open fluid storages?
         if (cauldronState.is(Blocks.CAULDRON)) {
-            BlockState blockstate = SMBlocks.AMBER_CAULDRON.get().defaultBlockState();
-            pLevel.setBlockAndUpdate(cauldronPos, blockstate);
-            pLevel.gameEvent(GameEvent.BLOCK_CHANGE, cauldronPos, GameEvent.Context.of(blockstate));
-            pLevel.levelEvent(1047, cauldronPos, 0);
+            cauldronState = SMBlocks.AMBER_CAULDRON.get().defaultBlockState();
+        } else if (cauldronState.getBlock() instanceof AmberLayeredCauldronBlock) {
+            int fluidLevel = cauldronState.getValue(BlockStateProperties.LEVEL_CAULDRON) + 1;
+            cauldronState = cauldronState.setValue(BlockStateProperties.LEVEL_CAULDRON, fluidLevel);
         }
-        if (cauldronState.getBlock() instanceof AmberLayeredCauldronBlock amberCauldron) {
-            if (!amberCauldron.isFull(cauldronState)) {
-                BlockState blockstate = cauldronState.setValue(AmberLayeredCauldronBlock.LEVEL, cauldronState.getValue(AmberLayeredCauldronBlock.LEVEL) + 1);
-                pLevel.setBlockAndUpdate(cauldronPos, blockstate);
-                pLevel.gameEvent(GameEvent.BLOCK_CHANGE, cauldronPos, GameEvent.Context.of(blockstate));
-                pLevel.levelEvent(1047, cauldronPos, 0);
-            }
-        }
+        level.setBlockAndUpdate(cauldronPos, cauldronState);
+        level.gameEvent(GameEvent.BLOCK_CHANGE, cauldronPos, GameEvent.Context.of(blockstate));
+        level.levelEvent(LevelEvent.SOUND_DRIP_WATER_INTO_CAULDRON, cauldronPos, 0);
     }
 
-    // Dripping mechanics deviate from vanilla
-    // Appears that it does not need a stalactite to drip into cauldron
-    @Nullable
-    private static BlockPos findFillableCauldronBelow(Level pLevel, BlockPos pos) {
-        Predicate<BlockState> predicate = state -> state.is(Blocks.CAULDRON) || state.is(SMBlocks.AMBER_CAULDRON.get());
-        BiPredicate<BlockPos, BlockState> bipredicate = (p_202034_, p_202035_) -> canDripThrough(pLevel, p_202034_, p_202035_);
-        return findBlockVertical(pLevel, pos, Direction.DOWN.getAxisDirection(), bipredicate, predicate, 11).orElse(null);
-    }
+// Dripping mechanics deviate from vanilla
+// Appears that it does not need a stalactite to drip into cauldron
+// copied from PointedDripstoneBlock
+// removed and deferred to vanilla logic via invoker
+//
+//    @Nullable
+//    private static BlockPos findFillableCauldronBelow(Level pLevel, BlockPos pos) {
+//        Predicate<BlockState> predicate = state -> state.is(Blocks.CAULDRON) || state.is(SMBlocks.AMBER_CAULDRON.get());
+//        BiPredicate<BlockPos, BlockState> bipredicate = (p_202034_, p_202035_) -> canDripThrough(pLevel, p_202034_, p_202035_);
+//        return findBlockVertical(pLevel, pos, Direction.DOWN.getAxisDirection(), bipredicate, predicate, 11).orElse(null);
+//    }
+//
+// copied from PointedDripstoneBlock
+// removed and deferred to vanilla logic via invoker
+//
+//    private static boolean canDripThrough(BlockGetter pLevel, BlockPos pos, BlockState state) {
+//        if (state.isAir()) {
+//            return true;
+//        } else if (state.isSolidRender(pLevel, pos)) {
+//            return false;
+//        } else if (!state.getFluidState().isEmpty()) {
+//            return false;
+//        } else {
+//            VoxelShape voxelshape = state.getCollisionShape(pLevel, pos);
+//            return !Shapes.joinIsNotEmpty(Block.box(6.0D, 0.0D, 6.0D, 10.0D, 16.0D, 10.0D), voxelshape, BooleanOp.AND);
+//        }
+//    }
 
-    private static boolean canDripThrough(BlockGetter pLevel, BlockPos pos, BlockState state) {
-        if (state.isAir()) {
-            return true;
-        } else if (state.isSolidRender(pLevel, pos)) {
-            return false;
-        } else if (!state.getFluidState().isEmpty()) {
-            return false;
-        } else {
-            VoxelShape voxelshape = state.getCollisionShape(pLevel, pos);
-            return !Shapes.joinIsNotEmpty(Block.box(6.0D, 0.0D, 6.0D, 10.0D, 16.0D, 10.0D), voxelshape, BooleanOp.AND);
-        }
-    }
-
-    private static Optional<BlockPos> findBlockVertical(LevelAccessor pLevel, BlockPos pos, Direction.AxisDirection pAxis, BiPredicate<BlockPos, BlockState> positionalStatePredicate, Predicate<BlockState> statePredicate, int pMaxIterations) {
-        Direction direction = Direction.get(pAxis, Direction.Axis.Y);
-        BlockPos.MutableBlockPos blockpos$mutableblockpos = pos.mutable();
-
-        for(int i = 1; i < pMaxIterations; ++i) {
-            blockpos$mutableblockpos.move(direction);
-            BlockState blockstate = pLevel.getBlockState(blockpos$mutableblockpos);
-            if (statePredicate.test(blockstate)) {
-                return Optional.of(blockpos$mutableblockpos.immutable());
-            }
-
-            if (pLevel.isOutsideBuildHeight(blockpos$mutableblockpos.getY()) || !positionalStatePredicate.test(blockpos$mutableblockpos, blockstate)) {
-                return Optional.empty();
-            }
-        }
-
-        return Optional.empty();
-    }
+// copied from PointedDripstoneBlock
+// removed and deferred to vanilla logic via invoker
+//
+//    private static Optional<BlockPos> findBlockVertical(LevelAccessor pLevel, BlockPos pos, Direction.AxisDirection pAxis, BiPredicate<BlockPos, BlockState> positionalStatePredicate, Predicate<BlockState> statePredicate, int pMaxIterations) {
+//        Direction direction = Direction.get(pAxis, Direction.Axis.Y);
+//        BlockPos.MutableBlockPos blockpos$mutableblockpos = pos.mutable();
+//
+//        for(int i = 1; i < pMaxIterations; ++i) {
+//            blockpos$mutableblockpos.move(direction);
+//            BlockState blockstate = pLevel.getBlockState(blockpos$mutableblockpos);
+//            if (statePredicate.test(blockstate)) {
+//                return Optional.of(blockpos$mutableblockpos.immutable());
+//            }
+//
+//            if (pLevel.isOutsideBuildHeight(blockpos$mutableblockpos.getY()) || !positionalStatePredicate.test(blockpos$mutableblockpos, blockstate)) {
+//                return Optional.empty();
+//            }
+//        }
+//
+//        return Optional.empty();
+//    }
 
     public static void spawnAmberParticles(BlockState state, Level pLevel, BlockPos pos, RandomSource pRandom) {
         if (state.getValue(IS_MELTED)) {

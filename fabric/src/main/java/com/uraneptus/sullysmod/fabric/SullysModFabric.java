@@ -1,8 +1,8 @@
 package com.uraneptus.sullysmod.fabric;
 
-import net.fabricmc.api.ModInitializer;
-
 import com.uraneptus.sullysmod.SullysMod;
+import com.uraneptus.sullysmod.core.registry.fabric.SMBlocksFabricEvents;
+import net.fabricmc.api.ModInitializer;
 
 public final class SullysModFabric implements ModInitializer {
     @Override
@@ -13,5 +13,6 @@ public final class SullysModFabric implements ModInitializer {
 
         // Run our common setup.
         SullysMod.init();
+        SMBlocksFabricEvents.registerCauldrons();
     }
 }

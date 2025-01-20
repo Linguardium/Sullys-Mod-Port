@@ -1,11 +1,13 @@
 package com.uraneptus.sullysmod.common.blocks;
 
+import com.uraneptus.sullysmod.core.registry.SMFluids;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.LayeredCauldronBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.Fluid;
 
 import static com.uraneptus.sullysmod.common.blocks.utilities.AmberUtil.AMBER_CAULDRON_INTERACTION;
@@ -14,13 +16,13 @@ public class AmberLayeredCauldronBlock extends LayeredCauldronBlock {
 
     public AmberLayeredCauldronBlock(Properties pProperties) {
         super(Biome.Precipitation.NONE, AMBER_CAULDRON_INTERACTION.get(), pProperties);
-        this.registerDefaultState(this.stateDefinition.any().setValue(LEVEL, 1));
+        this.registerDefaultState(this.stateDefinition.any().setValue(BlockStateProperties.LEVEL_CAULDRON, 1));
     }
 
 
     @Override
-    protected boolean canReceiveStalactiteDrip(Fluid pFluid) {
-        return false;
+    protected boolean canReceiveStalactiteDrip(Fluid fluid) {
+        return fluid.isSame(SMFluids.SOURCE_MOLTEN_AMBER.get());
     }
 
     @Override

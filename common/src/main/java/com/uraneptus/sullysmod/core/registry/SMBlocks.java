@@ -4,6 +4,9 @@ import com.mojang.datafixers.util.Pair;
 import com.uraneptus.sullysmod.common.blocks.*;
 import com.uraneptus.sullysmod.common.blocks.utilities.SMDirectionalBlock;
 import com.uraneptus.sullysmod.core.other.SMProperties;
+import com.uraneptus.sullysmod.core.other.SMTextDefinitions;
+import com.uraneptus.sullysmod.core.other.SMTextUtil;
+import dev.architectury.core.block.ArchitecturyLiquidBlock;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import dev.architectury.registry.registries.RegistrySupplier;
 import net.minecraft.core.Direction;
@@ -12,7 +15,10 @@ import net.minecraft.world.item.*;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.properties.BlockSetType;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.block.state.properties.WoodType;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.MapColor;
 import org.jetbrains.annotations.Nullable;
 
@@ -73,8 +79,8 @@ public class SMBlocks {
     public static final RegistrySupplier<Block> ROUGH_AMBER = createBlock("rough_amber", () -> new SolidAmberBlock(SMProperties.Blocks.AMBER_BUILDING_BLOCKS));
     public static final RegistrySupplier<Block> CHISELED_AMBER = createBlock("chiseled_amber", () -> new SolidAmberBlock(SMProperties.Blocks.AMBER_BUILDING_BLOCKS));
     public static final RegistrySupplier<Block> AMBER_PILLAR = createBlock("amber_pillar", () -> new AmberRotatedPillarBlock(SMProperties.Blocks.AMBER_BUILDING_BLOCKS));
-    public static final RegistrySupplier<LiquidBlock> MOLTEN_AMBER_BLOCK = createBlockNoItem("molten_amber_block", () -> new LiquidBlock(SMFluids.SOURCE_MOLTEN_AMBER, BlockBehaviour.Properties.copy(Blocks.LAVA).speedFactor(0.5F).lightLevel(blockState -> 0)));
-    public static final RegistrySupplier<Block> AMBER_CAULDRON = createBlockNoItem("amber_cauldron", () -> new AmberLayeredCauldronBlock(BlockBehaviour.Properties.copy(Blocks.CAULDRON)));
+    public static final RegistrySupplier<LiquidBlock> MOLTEN_AMBER_BLOCK = createBlockNoItem("molten_amber_block", () -> new ArchitecturyLiquidBlock(SMFluids.SOURCE_MOLTEN_AMBER, BlockBehaviour.Properties.ofFullCopy(Blocks.LAVA).speedFactor(0.5F).lightLevel(blockState -> 0)));
+    public static final RegistrySupplier<Block> AMBER_CAULDRON = createBlockNoItem("amber_cauldron", () -> new AmberLayeredCauldronBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.CAULDRON)));
 
     //Gem Lanterns
     public static final RegistrySupplier<Block> AMBER_LANTERN = createBlock("amber_lantern", () -> new SolidAmberBlock(SMProperties.Blocks.AMBER_BUILDING_BLOCKS.lightLevel(state -> 15)));
@@ -199,4 +205,14 @@ public class SMBlocks {
     static void registerWaxableBlockPair(RegistrySupplier<Block> from, RegistrySupplier<Block> to) {
         throw new UnsupportedOperationException("This method should be replaced by Architectury");
     }
+    public static void registerCauldronBlocks() {
+        registerCauldron(AMBER_CAULDRON, SMFluids.SOURCE_MOLTEN_AMBER, BlockStateProperties.LEVEL_CAULDRON);
+    }
+    static void registerCauldron(RegistrySupplier<Block> cauldronBlock, RegistrySupplier<? extends Fluid> fluid, IntegerProperty levelProperty) {
+        CAULDRON_MAP.add(new CauldronMap(cauldronBlock, fluid, levelProperty));
+    }
+
+    public static ArrayList<CauldronMap> CAULDRON_MAP = new ArrayList<>();
+    public record CauldronMap(RegistrySupplier<Block> cauldronBlock, RegistrySupplier<? extends Fluid> fluid, IntegerProperty levelProperty) { }
+
 }

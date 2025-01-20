@@ -26,9 +26,8 @@ import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import static com.uraneptus.sullysmod.core.other.tags.CommonTags.HONEYCOMBS;
-import static com.uraneptus.sullysmod.core.other.tags.CommonTags.SHEARS;
-
+import static com.uraneptus.sullysmod.core.other.tags.SMItemTags.HONEYCOMBS;
+import static com.uraneptus.sullysmod.core.other.tags.SMItemTags.SHEARS;
 
 public class FlingerTotem extends SMDirectionalBlock implements EntityBlock {
     public static final IntegerProperty HONEY_AMOUNT = IntegerProperty.create("honey_amount", 0, 4);

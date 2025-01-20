@@ -1,5 +1,6 @@
 package com.uraneptus.sullysmod.core.other;
 
+import com.uraneptus.sullysmod.core.other.tags.SMItemTags;
 import com.uraneptus.sullysmod.core.registry.SMSounds;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -14,6 +15,7 @@ import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 
+import static com.uraneptus.sullysmod.common.items.JadeShieldItem.createJadeShieldModifiers;
 import static net.minecraft.world.item.component.Consumables.defaultFood;
 
 public class SMProperties {
@@ -50,7 +52,7 @@ public class SMProperties {
 
         //Item Specific
         public static final Item.Properties MUSIC_DISCS = singleStack().rarity(Rarity.RARE);
-        public static final Item.Properties JADE_SHIELD = new Item.Properties().durability(400);
+        public static final Item.Properties JADE_SHIELD = jadeProperties().durability(400).attributes(createJadeShieldModifiers(-2.0f));
 
         // TODO: Additional Rarities
         public static Item.Properties artifacts() {
@@ -79,5 +81,11 @@ public class SMProperties {
                 .build();
         public static final Consumable COOKED_LANTERNFISH_FOOD = defaultFood()
                 .onConsume(new ApplyStatusEffectsConsumeEffect(new MobEffectInstance(MobEffects.GLOWING, 200), 1.0F)).build();
+    }
+    public static Item.Properties jadeProperties() {
+        return new Item.Properties().repairable(SMItemTags.JADE_GEM);
+    }
+    public static final Item.Properties stacksOnce() {
+        return new Item.Properties().stacksTo(1);
     }
 }

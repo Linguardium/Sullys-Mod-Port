@@ -8,7 +8,10 @@
   "mixins": [
     "BlockEntityTypeHelper",
     "BlockSetTypeHelper",
+    "CauldronLogicAccessor",
     "EggBlockExtension",
+    "PointedDripstoneDrippingLogic",
+    "TreeDecoratorTypeHelper",
     "WallBlockAccessor",
     "WoodTypeHelper"
   ],

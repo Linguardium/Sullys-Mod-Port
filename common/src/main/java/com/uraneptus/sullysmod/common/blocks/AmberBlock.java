@@ -33,7 +33,8 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
-import static com.uraneptus.sullysmod.common.blocks.utilities.AmberUtil.IS_MELTED;
+import static com.uraneptus.sullysmod.core.other.SMBlockStateProperties.IS_MELTED;
+
 
 public class AmberBlock extends Block implements EntityBlock {
 

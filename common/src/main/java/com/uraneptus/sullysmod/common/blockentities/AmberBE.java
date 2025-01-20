@@ -114,16 +114,17 @@ public class AmberBE extends BlockEntity {
 
     //This method only stores the entity id and is only used by Amber worldgen
     //The actual saving process for the generated entities is later done in the tick method
-    public boolean storeTypeForGeneration(EntityType<?> entityType) {
-        if (this.stuckEntityData != null) return false;
+    public boolean storeTypeForGeneration(ResourceLocation entityType) {
+        if (!this.stuckEntityData.isEmpty()) return false;
         CompoundTag compoundtag = new CompoundTag();
-        ResourceLocation resourcelocation = EntityType.getKey(entityType);
-        String id = entityType.canSerialize() ? resourcelocation.toString() : null;
-        if (id == null) return false;
-        compoundtag.putString("id", id);
-
+        compoundtag.putString("id", entityType.toString());
         this.storeEntity(CustomData.of(compoundtag));
         return true;
+    }
+
+    public boolean storeTypeForGeneration(EntityType<?> entityType) {
+        if (!entityType.canSerialize()) return false;
+        return storeTypeForGeneration(EntityType.getKey(entityType));
     }
 
     public void storeEntity(CustomData pEntityData) {
