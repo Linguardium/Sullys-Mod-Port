@@ -5,13 +5,14 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AnimationState;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
@@ -23,7 +24,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 
 public class BoulderingZombie extends Zombie {
-    private static final EntityDataAccessor<Byte> CLIMBING_DATA = SynchedEntityData.defineId(BoulderingZombie.class, EntityDataSerializers.BYTE);
+    private static final EntityDataAccessor<Boolean> CLIMBING_DATA = SynchedEntityData.defineId(BoulderingZombie.class, EntityDataSerializers.BOOLEAN);
     protected final WallClimberNavigation climberNavigation;
     protected final GroundPathNavigation groundNavigation;
     public final AnimationState climbAnimationState = new AnimationState();
@@ -38,16 +39,12 @@ public class BoulderingZombie extends Zombie {
         return Zombie.createAttributes().add(Attributes.MAX_HEALTH, 23.0D).add(Attributes.ATTACK_DAMAGE, 5.0D);
     }
 
-    @Override
-    protected void registerGoals() {
-        super.registerGoals();
+    // TODO: SpawnRestrictions
+    public static boolean checkBoulderingZombieSpawnRules(EntityType<? extends BoulderingZombie> entityType, ServerLevelAccessor level, EntitySpawnReason entitySpawnReason, BlockPos pos, RandomSource random) {
+        return isInDeepslateLayer(pos, random) && Monster.checkMonsterSpawnRules(entityType, level, entitySpawnReason, pos, random);
     }
 
-
-    public static boolean checkBoulderingZombieSpawnRules(EntityType<? extends BoulderingZombie> entityType, ServerLevelAccessor level, MobSpawnType spawnType, BlockPos pos, RandomSource random) {
-        return isInDeepslateLayer(pos, random) && Monster.checkMonsterSpawnRules(entityType, level, spawnType, pos, random);
-    }
-
+    // TODO: programatically handle deepslate level check
     public static boolean isInDeepslateLayer(BlockPos pos, RandomSource random) {
         int chance = random.nextInt(100);
         double y = pos.getY();
@@ -56,14 +53,9 @@ public class BoulderingZombie extends Zombie {
     }
 
     @Override
-    public float getScale() {
-        return this.isBaby() ? 0.5F : 1.0625F;
-    }
-
-    @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(CLIMBING_DATA, (byte)0);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(CLIMBING_DATA, false);
     }
 
     @Override
@@ -92,27 +84,20 @@ public class BoulderingZombie extends Zombie {
     }
 
     @Override
-    public boolean hurt(DamageSource pSource, float pAmount) {
-        if (pSource.is(DamageTypeTags.IS_FIRE)) {
-            pAmount *= 1.5F;
+    public boolean hurtServer(ServerLevel serverLevel, DamageSource damageSource, float amount) {
+        if (damageSource.is(DamageTypeTags.IS_FIRE)) {
+            amount *= 1.5F;
         }
-        return super.hurt(pSource, pAmount);
+        return super.hurtServer(serverLevel, damageSource, amount);
     }
 
     @Override
     public boolean onClimbable() {
-        return (this.entityData.get(CLIMBING_DATA) & 1) != 0;
+        return this.entityData.get(CLIMBING_DATA);
     }
 
     public void setClimbing(boolean pClimbing) {
-        byte b0 = this.entityData.get(CLIMBING_DATA);
-        if (pClimbing) {
-            b0 = (byte)(b0 | 1);
-        } else {
-            b0 = (byte)(b0 & -2);
-        }
-
-        this.entityData.set(CLIMBING_DATA, b0);
+        this.entityData.set(CLIMBING_DATA, pClimbing);
     }
 
     @Override
