@@ -14,6 +14,9 @@ public class SMItemTags {
     public static final TagKey<Item> ARTIFACTS = SMTagUtil.itemTag("artifacts");
     public static final TagKey<Item> ANCIENT_SKULLS = SMTagUtil.itemTag("artifacts/ancient_skulls");
     public static final TagKey<Item> UNREPAIRABLE = SMTagUtil.itemTag("empty_tag");
+    public static final TagKey<Item> WORKSTATIONS = SMTagUtil.itemTag("empty_tag");
+        // SMItemTags.CRAFTING_TABLES) || itemInHand.is(SMItemTags.JUKEBOXES)
+        // TODO: datagen workstation tag
 
     //Forge Tags
     // TODO: common tags

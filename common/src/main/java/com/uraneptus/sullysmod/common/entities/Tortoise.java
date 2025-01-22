@@ -117,7 +117,7 @@ public class Tortoise extends Animal implements WorkstationAttachable {
         this.goalSelector.setControlFlag(Goal.Flag.LOOK, true);
     }
 
-    public static boolean checkTortoiseSpawnRules(EntityType<? extends Tortoise> entity, LevelAccessor pLevel, MobSpawnType pSpawnType, BlockPos pPos, RandomSource pRandom) {
+    public static boolean checkTortoiseSpawnRules(EntityType<? extends Tortoise> entity, LevelAccessor pLevel, EntitySpawnReason pSpawnType, BlockPos pPos, RandomSource pRandom) {
         return Animal.checkAnimalSpawnRules(entity, pLevel, pSpawnType, pPos, pRandom);
     }
 
@@ -440,8 +440,8 @@ public class Tortoise extends Animal implements WorkstationAttachable {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
+    protected defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
         this.entityData.define(HIDE_TIMER, 0);
         this.entityData.define(HAS_EGG, false);
         this.entityData.define(LAYING_EGG, false);

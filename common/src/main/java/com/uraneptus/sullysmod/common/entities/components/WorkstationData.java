@@ -1,16 +1,12 @@
-package com.uraneptus.sullysmod.common.entities;
+package com.uraneptus.sullysmod.common.entities.components;
 
-import com.mojang.serialization.DataResult;
-import com.mojang.serialization.Dynamic;
-import com.mojang.serialization.MapCodec;
 import com.uraneptus.sullysmod.core.other.SMItemUtil;
 import com.uraneptus.sullysmod.core.other.tags.SMItemTags;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
@@ -23,90 +19,150 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.CraftingMenu;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.JukeboxSong;
+import net.minecraft.world.item.JukeboxSongPlayer;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public interface WorkstationAttachable {
-    ItemStack getAppliedWorkstation();
-    void setAppliedWorkstation(ItemStack itemStack);
-    boolean hasAppliedWorkstation();
-    default boolean isCraftingTable() {
+public class WorkstationData {
+    private ItemStack appledWorkstation = ItemStack.EMPTY;
+    private ItemStack recordItem = ItemStack.EMPTY;
+    JukeboxSongPlayer jukeboxSongPlayer;
+    int ticksSinceLastEvent = 0;
+
+    Entity holder;
+    public WorkstationData(Entity holder) {
+        this.holder = holder;
+        // TODO: entity specific jukebox song player
+        this.jukeboxSongPlayer = new JukeboxSongPlayer(this::onRecordSongChanged, holder.getOnPos());
+    }
+
+    ItemStack getAppliedWorkstation() {
+        return appledWorkstation;
+    }
+
+    public void setAppliedWorkstation(LevelAccessor level, @Nullable Player player, ItemStack itemStack) {
+        if (!this.getAppliedWorkstation().isEmpty() && level instanceof ServerLevelAccessor serverLevel) {
+            this.removeAppliedWorkstation(serverLevel, player instanceof ServerPlayer serverPlayer ? serverPlayer : null);
+        }
+        this.appledWorkstation = itemStack;
+    }
+
+    public boolean hasAppliedWorkstation() {
+       return !this.getAppliedWorkstation().isEmpty();
+    }
+
+    public boolean isCraftingTable() {
         return getAppliedWorkstation().is(SMItemTags.CRAFTING_TABLES);
     }
-    default boolean isJukebox() {
+
+    public boolean isJukebox() {
         return getAppliedWorkstation().is(SMItemTags.JUKEBOXES);
     }
-    ItemStack getRecordItem();
-    void setRecordItem(ItemStack itemStack);
-    long getRecordTickCount();
-    void setRecordTickCount(long tickCount);
-    long getRecordStartedTick();
-    void setRecordStartedTick(long startedTick);
-    //TODO sync this
-    boolean isRecordPlaying();
-    void setRecordPlaying(boolean isPlaying);
-    int getTicksSinceLastEvent();
-    void setTicksSinceLastEvent(int ticksSinceLastEvent);
+    public void onRecordSongChanged() {
 
-    static MapCodec<WorkstationAttachable> mapCodec();
-    StreamCodec<RegistryFriendlyByteBuf, ? extends WorkstationAttachable> packetCodec();
+    }
+    public ItemStack getRecordItem() {
+        return this.recordItem;
+    }
+    public void setRecordItem(LevelAccessor level, ItemStack itemStack) {
+        this.recordItem = itemStack;
+        ticksSinceLastEvent = 0;
+        this.jukeboxSongPlayer.stop(level, Blocks.JUKEBOX.defaultBlockState());
+        //TODO: handle jukebox player
+    }
+
+    public long getRecordTickCount(HolderLookup.Provider provider) {
+        ItemStack record = this.getRecordItem();
+        if (record.isEmpty() || !record.has(DataComponents.JUKEBOX_PLAYABLE)) return 0;
+        return JukeboxSong.fromStack(provider, record).map(song->song.value().lengthInTicks()).orElse(0);
+    }
+
+    //void setRecordTickCount(long tickCount);
+//    long getRecordStartedTick();
+//    void setRecordStartedTick(long startedTick);
+    //TODO sync this
+//    boolean isRecordPlaying();
+//    void setRecordPlaying(boolean isPlaying);
+    int getTicksSinceLastEvent() {
+        return ticksSinceLastEvent;
+    }
+    void setTicksSinceLastEvent(int ticksSinceLastEvent) {
+        this.ticksSinceLastEvent = ticksSinceLastEvent;
+    }
+
+//    static MapCodec<WorkstationAttachable> mapCodec();
+//    StreamCodec<RegistryFriendlyByteBuf, ? extends WorkstationAttachable> packetCodec();
 
     // TODO: Codecify and clean up interaction code
-    default <T> DataResult<T> addSaveData(RegistryOps<T> ops) {
-        return this.mapCodec().codec().encodeStart(ops, this);
+//    default <T> DataResult<T> addSaveData(RegistryOps<T> ops) {
+//        return this.mapCodec().codec().encodeStart(ops, this);
 //        nbt.put("AppliedWorkstation", this.getAppliedWorkstation().save(provider));
 //        nbt.put("RecordItem", this.getRecordItem().save(provider));
 //        nbt.putBoolean("IsPlaying", this.isRecordPlaying());
 //        nbt.putLong("RecordStartTick", this.getRecordStartedTick());
 //        nbt.putLong("TickCount", this.getRecordTickCount());
-    }
-
-    default <T> void readSaveData(Dynamic<T> dynamic) {
+//    }
+//
+//    default <T> void readSaveData(Dynamic<T> dynamic) {
 //        this.setAppliedWorkstation(ItemStack.parse(provider,nbt.getCompound("AppliedWorkstation")));
 //        this.setRecordItem(ItemStack.of(nbt.getCompound("RecordItem")));
 //        this.setRecordPlaying(nbt.getBoolean("IsPlaying"));
 //        this.setRecordStartedTick(nbt.getLong("RecordStartTick"));
 //        this.setRecordTickCount(nbt.getLong("TickCount"));
+//    }
+
+    public InteractionResult customInteraction(Player pPlayer, @NotNull InteractionHand pHand) { }
+
+    public void removeRecord(ServerLevelAccessor level, @Nullable ServerPlayer player) {
+        if (player != null) player.handleExtraItemsCreatedOnUse(getRecordItem());
+        else holder.spawnAtLocation(level.getLevel(), getRecordItem());
+        this.setRecordItem(level, ItemStack.EMPTY);
     }
 
-    InteractionResult customInteraction(Player pPlayer, @NotNull InteractionHand pHand);
+    public void removeAppliedWorkstation(ServerLevelAccessor level, @Nullable ServerPlayer player) {
+        if (this.isJukebox()) removeRecord(level, player);
+        if (player != null) player.handleExtraItemsCreatedOnUse(getAppliedWorkstation());
+        else holder.spawnAtLocation(level.getLevel(), getAppliedWorkstation());
+        this.appledWorkstation = ItemStack.EMPTY;
+    }
+    public InteractionResult applyWorkstation(LevelAccessor level, @Nullable Player player) {
+        setAppliedWorkstation(pPlayer.level(), pPlayer, itemInHand.copy());
+        entity.refreshDimensions();
+        if (!pPlayer.isCreative()) {
+            itemInHand.shrink(1);
+            return InteractionResult.sidedSuccess(entity.level().isClientSide());
+        }
+        return InteractionResult.SUCCESS;
+    }
 
-    //It was hell to handle this code for both entities. It works now, and I never want to touch this shit again
-    default InteractionResult workstationInteraction(Player pPlayer, @NotNull InteractionHand pHand, Entity entity) {
-        boolean flag = false;
-        ItemStack itemInHand = pPlayer.getItemInHand(pHand);
-        if (hasAppliedWorkstation()) {
-            if (pPlayer.isShiftKeyDown()) {
-                if (itemInHand.is(ItemTags.AXES)) {
-                    if (isJukebox() && !getRecordItem().isEmpty()) {
-                        if (!entity.level().isClientSide()) {
-                            pPlayer.addItem(getRecordItem());
-                            setRecordItem(ItemStack.EMPTY);
-                            this.setRecordPlaying(false);
-                            this.setRecordTickCount(0);
-                            this.setTicksSinceLastEvent(0);
-                        }
-                    }
-                    SMItemUtil.nonCreativeAddItems(pPlayer, new ItemStack(this.getAppliedWorkstation().getItem()));
-                    setAppliedWorkstation(ItemStack.EMPTY);
+    private InteractionResult interactWithAppliedWorkstation(Player pPlayer, @NotNull InteractionHand pHand, Entity entity) {
+        if (pPlayer.isShiftKeyDown()) {
+            if (itemInHand.is(ItemTags.AXES)) {
+                if (entity.level() instanceof ServerLevel serverLevel) {
+                    removeAppliedWorkstation(serverLevel, pPlayer instanceof ServerPlayer serverPlayer ? serverPlayer : null);
                     entity.refreshDimensions();
-                    return InteractionResult.sidedSuccess(entity.level().isClientSide());
+                    return InteractionResult.SUCCESS;
                 }
-                flag = true;
+                return customInteraction(pPlayer, pHand);
             } else {
                 if (isCraftingTable()) {
-                    if (!entity.level().isClientSide()) {
-                        this.openCraftingMenu((ServerPlayer)pPlayer, entity);
+                    if (! entity.level().isClientSide()) {
+                        this.openCraftingMenu((ServerPlayer) pPlayer, entity);
                         pPlayer.awardStat(Stats.INTERACT_WITH_CRAFTING_TABLE);
                         return InteractionResult.CONSUME;
                     }
                     return InteractionResult.SUCCESS;
                 } else if (isJukebox()) {
                     if (itemInHand.isEmpty()) {
-                        if (!getRecordItem().isEmpty()) {
-                            if (!entity.level().isClientSide()) {
+                        if (! getRecordItem().isEmpty()) {
+                            if (! entity.level().isClientSide()) {
                                 pPlayer.addItem(getRecordItem());
                                 setRecordItem(ItemStack.EMPTY);
                                 this.setRecordPlaying(false);
@@ -130,23 +186,18 @@ public interface WorkstationAttachable {
                     return InteractionResult.sidedSuccess(entity.level().isClientSide());
                 }
             }
-        } else if (itemInHand.is(SMItemTags.CRAFTING_TABLES) || itemInHand.is(SMItemTags.JUKEBOXES)) {
-            setAppliedWorkstation(itemInHand.copy());
-            entity.refreshDimensions();
-            if (!pPlayer.isCreative()) {
-                itemInHand.shrink(1);
-                return InteractionResult.sidedSuccess(entity.level().isClientSide());
-            }
-            return InteractionResult.SUCCESS;
-        } else {
-            flag = true;
         }
-
-        if (flag) {
-            return customInteraction(pPlayer, pHand);
-        }
-
         return InteractionResult.PASS;
+    }
+
+    //It was hell to handle this code for both entities. It works now, and I never want to touch this shit again
+    // if the method is to complex/large, split it up - Ling
+    public InteractionResult workstationInteraction(Player pPlayer, @NotNull InteractionHand pHand, Entity entity) {
+        boolean flag = false;
+        ItemStack itemInHand = pPlayer.getItemInHand(pHand);
+        if (hasAppliedWorkstation()) return interactWithAppliedWorkstation(pPlayer, pHand, entity);
+        else if (itemInHand.is(SMItemTags.WORKSTATIONS)) return applyWorkstation(pPlayer.level(), pPlayer);
+        else return customInteraction(pPlayer, pHand);
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -205,4 +256,5 @@ public interface WorkstationAttachable {
             this.setTicksSinceLastEvent(0);
         }
     }
+
 }

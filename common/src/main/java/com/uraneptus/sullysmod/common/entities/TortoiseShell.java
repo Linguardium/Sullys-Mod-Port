@@ -2,7 +2,6 @@ package com.uraneptus.sullysmod.common.entities;
 
 import com.uraneptus.sullysmod.core.other.tags.SMBlockTags;
 import com.uraneptus.sullysmod.core.registry.SMDamageTypes;
-import com.uraneptus.sullysmod.core.registry.SMEntityTypes;
 import com.uraneptus.sullysmod.core.registry.SMItems;
 import com.uraneptus.sullysmod.core.registry.SMSounds;
 import net.minecraft.BlockUtil;
@@ -12,6 +11,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.players.OldUsersConverter;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
@@ -30,11 +30,8 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.ForgeMod;
-import net.minecraftforge.fluids.FluidType;
-import net.minecraftforge.network.PlayMessages;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -58,10 +55,6 @@ public class TortoiseShell extends Entity implements OwnableEntity, WorkstationA
         this.blocksBuilding = true;
     }
 
-    public TortoiseShell(PlayMessages.SpawnEntity spawnEntity, Level level) {
-        this(SMEntityTypes.TORTOISE_SHELL.get(), level);
-    }
-
     public void setOwner(LivingEntity pOwner) {
         this.setOwnerUUID(pOwner.getUUID());
     }
@@ -76,10 +69,11 @@ public class TortoiseShell extends Entity implements OwnableEntity, WorkstationA
         this.entityData.set(DATA_OWNERUUID_ID, Optional.ofNullable(pUuid));
     }
 
-    @Override
-    protected float getEyeHeight(Pose pPose, EntityDimensions pSize) {
-        return pSize.height;
-    }
+    // TODO: Entity Dimensions
+//    @Override
+//    protected float getEyeHeight(Pose pPose, EntityDimensions pSize) {
+//        return pSize.height;
+//    }
 
     @Override
     public EntityDimensions getDimensions(Pose pPose) {
@@ -88,15 +82,15 @@ public class TortoiseShell extends Entity implements OwnableEntity, WorkstationA
     }
 
     @Override
-    protected void defineSynchedData() {
-        this.entityData.define(DATA_ID_HURT, 0);
-        this.entityData.define(DATA_ID_HURTDIR, 1);
-        this.entityData.define(DATA_ID_DAMAGE, 0.0F);
-        this.entityData.define(SPIN_TICKS, 0);
-        this.entityData.define(DATA_OWNERUUID_ID, Optional.empty());
-        this.entityData.define(WORKSTATION, ItemStack.EMPTY);
-        this.entityData.define(RECORD_ITEM, ItemStack.EMPTY);
-        this.entityData.define(IS_RECORD_PLAYING, false);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        builder.define(DATA_ID_HURT, 0);
+        builder.define(DATA_ID_HURTDIR, 1);
+        builder.define(DATA_ID_DAMAGE, 0.0F);
+        builder.define(SPIN_TICKS, 0);
+        builder.define(DATA_OWNERUUID_ID, Optional.empty());
+        builder.define(WORKSTATION, ItemStack.EMPTY);
+        builder.define(RECORD_ITEM, ItemStack.EMPTY);
+        builder.define(IS_RECORD_PLAYING, false);
     }
 
     public Integer getSpinTicksEntityData() {
@@ -113,7 +107,7 @@ public class TortoiseShell extends Entity implements OwnableEntity, WorkstationA
     public void push(double pX, double pY, double pZ) {}
 
     @Override
-    protected Vec3 getRelativePortalPosition(Direction.Axis pAxis, BlockUtil.FoundRectangle pPortal) {
+    public Vec3 getRelativePortalPosition(Direction.Axis pAxis, BlockUtil.FoundRectangle pPortal) {
         return LivingEntity.resetForwardDirectionOfRelativePortalPosition(super.getRelativePortalPosition(pAxis, pPortal));
     }
 
@@ -127,7 +121,7 @@ public class TortoiseShell extends Entity implements OwnableEntity, WorkstationA
         double y = this.getDeltaMovement().get(Direction.Axis.Y);
         double x = this.getX() - player.getX();
         double z = this.getZ() - player.getZ();
-        if (y == -0.0 && !this.isInFluidType() && (yLookAnglePlayer > -0.6D && yLookAnglePlayer < 0.1) && getSpinTicksEntityData() == 0) {
+        if (y == -0.0 && !this.isUnderWater() && (yLookAnglePlayer > -0.6D && yLookAnglePlayer < 0.1) && getSpinTicksEntityData() == 0) {
             double d2 = Math.max(x * x + z * z, 0.001D);
             this.setDeltaMovement(x / d2 * 2.1D, 0.05D, z / d2 * 2.1D);
             setSpinTimer();
@@ -145,39 +139,37 @@ public class TortoiseShell extends Entity implements OwnableEntity, WorkstationA
         return this.workstationInteraction(pPlayer, pHand, this);
     }
 
+    // TODO: convert to loot table. Maybe convert to block
     @Override
-    public boolean hurt(DamageSource pSource, float pAmount) {
+    public boolean hurtServer(ServerLevel level, DamageSource pSource, float pAmount) {
         if (pSource == this.damageSources().cactus() || pSource == this.damageSources().onFire() || pSource == this.damageSources().inFire()) {
-            if (this.level().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
-                this.spawnAtLocation(this.getDropItem());
+            if (level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+                this.spawnAtLocation(level, this.getDropItem());
             }
-            this.discard();
-        }
-        if (pSource == this.damageSources().lava()) {
-            this.discard();
+            this.remove(RemovalReason.DISCARDED);
+            return true;
         }
 
-        if (this.isInvulnerableTo(pSource)) {
-            return false;
-        } else if (!this.level().isClientSide && !this.isRemoved()) {
-            this.setHurtDir(-this.getHurtDir());
-            this.setHurtTime(10);
-            this.setDamage(this.getDamage() + pAmount * 10.0F);
-            this.markHurt();
-            this.gameEvent(GameEvent.ENTITY_DAMAGE, pSource.getEntity());
-            if (pSource.getEntity() instanceof Player player) {
-                boolean flag = player.getAbilities().instabuild;
-                if (flag || this.getDamage() > 40.0F) {
-                    if (!flag && this.level().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS) && pSource != this.damageSources().lava() && pSource != this.damageSources().cactus() && pSource != this.damageSources().inFire() && pSource != this.damageSources().onFire()) {
-                        this.spawnAtLocation(this.getDropItem());
-                    }
-                    this.discard();
-                }
-            }
-            return true;
-        } else {
+        if (pSource == this.damageSources().lava()) {
+            this.remove(RemovalReason.KILLED);
             return true;
         }
+
+        if (this.isInvulnerableToBase(pSource)) return false;
+        if (this.isRemoved()) return true;
+
+        this.setHurtDir(-this.getHurtDir());
+        this.setHurtTime(10);
+        this.setDamage(this.getDamage() + pAmount * 10.0F);
+        this.markHurt();
+        this.gameEvent(GameEvent.ENTITY_DAMAGE, pSource.getEntity());
+        if ((pSource.getEntity() instanceof Player player && player.isCreative()) || this.getDamage() > 40.0F) {
+            if (level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+                this.spawnAtLocation(level, this.getDropItem());
+            }
+            this.discard();
+        }
+        return true;
     }
 
     public Item getDropItem() {
@@ -202,9 +194,9 @@ public class TortoiseShell extends Entity implements OwnableEntity, WorkstationA
                 LivingEntity owner = this.getOwner();
                 if (livingEntity instanceof Player player) {
                     if (player.isBlocking()) {
-                        player.getCooldowns().addCooldown(player.getUseItem().getItem(), 100);
+                        player.getCooldowns().addCooldown(player.getUseItem(), 100);
                         player.stopUsingItem();
-                        player.level().broadcastEntityEvent(player, (byte) 30);
+                        player.level().broadcastEntityEvent(player, EntityEvent.SHIELD_DISABLED);
                     }
                     if (!player.isBlocking()) {
                         handleDamage(owner, entity);
@@ -217,7 +209,7 @@ public class TortoiseShell extends Entity implements OwnableEntity, WorkstationA
                 if (ravagerEntity.getStunnedTick() == 0 && ravagerEntity.getRoarTick() == 0) {
                     ravagerEntity.handleEntityEvent((byte) 39);
                     ravagerEntity.playSound(SoundEvents.RAVAGER_STUNNED, 1.0F, 1.0F);
-                    ravagerEntity.level().broadcastEntityEvent(ravagerEntity, (byte) 39);
+                    ravagerEntity.level().broadcastEntityEvent(ravagerEntity, EntityEvent.RAVAGER_STUNNED);
                 }
             }
         }
@@ -244,9 +236,9 @@ public class TortoiseShell extends Entity implements OwnableEntity, WorkstationA
 
                     this.setDeltaMovement(shellX / d2 * 0.4D, 0.005D, shellZ / d2 * 0.4D);
 
-                    player.getCooldowns().addCooldown(player.getUseItem().getItem(), 100);
+                    player.getCooldowns().addCooldown(player.getUseItem(), 100);
                     player.stopUsingItem();
-                    player.level().broadcastEntityEvent(player, (byte) 30);
+                    player.level().broadcastEntityEvent(player, EntityEvent.SHIELD_DISABLED);
                 }
             }
         }

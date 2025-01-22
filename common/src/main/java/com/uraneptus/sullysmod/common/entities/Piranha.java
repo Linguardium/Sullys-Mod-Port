@@ -103,13 +103,13 @@ public class Piranha extends AbstractSchoolingFish implements NeutralMob {
         return isAngryAt(target) || (target instanceof Player player && !player.getAbilities().instabuild) || target.getHealth() < target.getMaxHealth();
     }
 
-    public static boolean checkPiranhaSpawnRules(EntityType<? extends WaterAnimal> entityType, ServerLevelAccessor level, MobSpawnType spawnType, BlockPos pos, RandomSource random) {
-        return WaterAnimal.checkSurfaceWaterAnimalSpawnRules(entityType, level, spawnType, pos, random);
+    public static boolean checkPiranhaSpawnRules(EntityType<? extends WaterAnimal> entityType, ServerLevelAccessor level, EntitySpawnReason entitySpawnReason, BlockPos pos, RandomSource random) {
+        return WaterAnimal.checkSurfaceWaterAnimalSpawnRules(entityType, level, entitySpawnReason, pos, random);
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
+    protected defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
         this.entityData.define(DATA_REMAINING_ANGER_TIME, 0);
         this.entityData.define(HAS_BOAT_TARGET, false);
         this.entityData.define(IS_LEAPING, false);

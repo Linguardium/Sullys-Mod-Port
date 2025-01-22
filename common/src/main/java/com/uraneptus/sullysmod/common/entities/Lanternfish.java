@@ -12,10 +12,10 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -47,8 +47,8 @@ public class Lanternfish extends AbstractFish {
         this.goalSelector.addGoal(1, new RandomSwimmingGoal(this, 1.0D, 40));
     }
 
-    protected void defineSynchedData() {
-        super.defineSynchedData();
+    protected defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
         this.entityData.define(DATA_DARK_TICKS_REMAINING, 0);
     }
 
@@ -112,9 +112,11 @@ public class Lanternfish extends AbstractFish {
         return new ItemStack(SMItems.LANTERNFISH_BUCKET.get());
     }
 
-    public static boolean checkLanternfishSpawnRules(EntityType<? extends LivingEntity> entityType, ServerLevelAccessor level, MobSpawnType spawnType, BlockPos pos, RandomSource random) {
+    public static boolean checkLanternfishSpawnRules(EntityType<? extends LivingEntity> entityType, ServerLevelAccessor level, EntitySpawnReason entitySpawnReason, BlockPos pos, RandomSource random) {
         int seaLevel = level.getSeaLevel();
+        // TODO: calculate spawn depth based on ocean floor heightmap?
         int maxLanternfishSeaLevel = seaLevel - 47;
+        // TODO: split spawn rule checks into method
         return pos.getY() <= maxLanternfishSeaLevel && level.getFluidState(pos.below()).is(Fluids.WATER) && level.getFluidState(pos.above()).is(FluidTags.WATER) && level.getRawBrightness(pos, 0) == 0;
     }
 
@@ -159,7 +161,6 @@ public class Lanternfish extends AbstractFish {
             this.lanternfish.getNavigation().moveTo(this.wantedX, this.wantedY, this.wantedZ, 1.0D);
         }
 
-        @javax.annotation.Nullable
         protected Vec3 getPosition() {
             RandomSource randomsource = this.lanternfish.getRandom();
             BlockPos blockpos = this.lanternfish.blockPosition();
