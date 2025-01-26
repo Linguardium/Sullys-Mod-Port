@@ -77,21 +77,21 @@ public class SMItems {
     public static Map<Supplier<? extends Item>, Integer> TRADES = new HashMap<>();
 
     public static final RegistrySupplier<Item> BROKEN_VASE = registerArtifact("broken_vase", "A large piece of the side is missing", 10);
-    public static final RegistrySupplier<Item> PRIMITIVE_KNIFE = registerArtifact("primitive_knife", "A small knife made from obsidian", () -> new ArtifactWeaponItem(SMToolMaterials.PRIMITIVE_KNIFE, null, SMProperties.Items.artifacts().stacksTo(1)), 15);
+    public static final RegistrySupplier<Item> PRIMITIVE_KNIFE = registerArtifact("primitive_knife", "A small knife made from obsidian", (properties) -> new ArtifactWeaponItem(SMToolMaterials.PRIMITIVE_KNIFE, null,properties),  SMProperties.Items.artifacts().stacksTo(1), 15);
     public static final RegistrySupplier<Item> MINERS_HELMET = registerArtifact("miners_helmet", "Looks like it’s previous owner couldn’t get the candle lit anymore",
-            () -> new MinersHelmetItem(SMProperties.Items.artifacts().stacksTo(1)), 15);
+            MinersHelmetItem::new, SMProperties.Items.artifacts().stacksTo(1), 15);
     public static final RegistrySupplier<Item> SMALL_DENTED_HELMET = registerArtifact("small_dented_helmet", "A small rusty helmet. Barely fits",
-            () -> new ArtifactHelmetItem(SMArmorMaterials.SMALL_DENTED_HELMET, SMProperties.Items.artifacts().stacksTo(1)), 22);
+            (properties) -> new ArtifactHelmetItem(SMArmorMaterials.SMALL_DENTED_HELMET,properties), SMProperties.Items.artifacts().stacksTo(1), 22);
     public static final RegistrySupplier<Item> LOST_CROWN = registerArtifact("lost_crown", "Once belonged to the king of a now fallen kingdom",
-            () -> new ArtifactHelmetItem(SMArmorMaterials.LOST_CROWN, SMProperties.Items.artifacts().stacksTo(1)), 30);
+            (properties) -> new ArtifactHelmetItem(SMArmorMaterials.LOST_CROWN, properties), SMProperties.Items.artifacts().stacksTo(1), 30);
     public static final RegistrySupplier<Item> JADE_AMULET = registerArtifact("jade_amulet", "A creature is carefully sculpted from the stone", 20);
     public static final RegistrySupplier<Item> PRIMITIVE_RING = registerArtifact("primitive_ring", "A roughly made metal ring", 10);
     public static final RegistrySupplier<Item> RUSTY_TOOLS = registerArtifact("rusty_tools", "Maybe their owners are still out there", 9);
     public static final RegistrySupplier<Item> BROKEN_BOWL = registerArtifact("broken_bowl", "A large crack runs down the edge", 9);
     public static final RegistrySupplier<Item> COPPER_COG = registerArtifact("copper_cog", "Said to have been part of living creatures", 23);
-    public static final RegistrySupplier<Item> PETRIFIED_COOKIE = registerArtifact("petrified_cookie", "Petrified food is still food, just extra crisp", () -> new Item(SMProperties.Items.artifacts().food(SMProperties.Foods.PETRIFIED_COOKIE)), 12);
+    public static final RegistrySupplier<Item> PETRIFIED_COOKIE = registerArtifact("petrified_cookie", "Petrified food is still food, just extra crisp", Item::new, SMProperties.Items.artifacts().food(SMProperties.Foods.PETRIFIED_COOKIE), 12);
     public static final RegistrySupplier<Item> ARROWHEAD = registerArtifact("arrowhead", "The tip of an ancient arrow", 5);
-    public static final RegistrySupplier<Item> DEATH_WHISTLE = registerArtifact("death_whistle", "Screeches horrible noises when blown into", DeathWhistleItem::new, 20);
+    public static final RegistrySupplier<Item> DEATH_WHISTLE = registerArtifact("death_whistle", "Screeches horrible noises when blown into", DeathWhistleItem::new, SMProperties.Items.artifacts(), 20);
     public static final RegistrySupplier<Item> OMINOUS_TABLET = registerArtifact("ominous_tablet", "A dark figure is carved into the stone", 25);
     public static final RegistrySupplier<Item> MOON_TABLET = registerArtifact("moon_tablet", "Has a carved image of the moon", 27);
     public static final RegistrySupplier<Item> STONE_IDOL = registerArtifact("stone_idol", "Almost looks alive", 20);
