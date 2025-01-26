@@ -1,9 +1,13 @@
 package com.uraneptus.sullysmod.core.registry;
 
 import com.google.common.base.Suppliers;
+import dev.architectury.injectables.annotations.ExpectPlatform;
 import dev.architectury.registry.registries.Registrar;
 import dev.architectury.registry.registries.RegistrarManager;
+import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
@@ -15,12 +19,21 @@ import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecoratorType;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Supplier;
 
 import static com.uraneptus.sullysmod.SullysMod.MOD_ID;
+import static com.uraneptus.sullysmod.core.other.SMLocationUtil.location;
 
 public class SMRegistries {
+
+    // Modded registries
+    public static final ResourceLocation WORKSTATION_TYPE_REGISTRY_ID = location("workstation_type");
+    public static final ResourceKey<Registry<SMWorkstationTypes.WorkstationType<?>>> WORKSTATION_TYPE_KEY = ResourceKey.createRegistryKey(WORKSTATION_TYPE_REGISTRY_ID);
+    public static final Registry<SMWorkstationTypes.WorkstationType<?>> WORKSTATION_TYPE_REGISTRY = createRegistry(WORKSTATION_TYPE_REGISTRY_ID, null, false);
+
+    // Registry registrars (like deferred registries)
     public static final Supplier<RegistrarManager> MANAGER = Suppliers.memoize(() -> RegistrarManager.get(MOD_ID));
     public static final Registrar<Item> ITEMS = MANAGER.get().get(Registries.ITEM);
     public static final Registrar<Block> BLOCKS = MANAGER.get().get(Registries.BLOCK);
@@ -33,7 +46,13 @@ public class SMRegistries {
     public static final Registrar<RecipeSerializer<?>> RECIPE_SERIALIZERS = MANAGER.get().get(Registries.RECIPE_SERIALIZER);
     public static final Registrar<RecipeType<?>> RECIPE_TYPES = MANAGER.get().get(Registries.RECIPE_TYPE);
     public static final Registrar<LootItemConditionType> LOOT_CONDITION_TYPES = MANAGER.get().get(Registries.LOOT_CONDITION_TYPE);
+    public static final Registrar<SMWorkstationTypes.WorkstationType<?>> WORKSTATION_TYPES = MANAGER.get().get(WORKSTATION_TYPE_KEY);
 
     public static void init() { }
+
+    @ExpectPlatform
+    public static <T> Registry<T> createRegistry(ResourceLocation registryId, @Nullable ResourceLocation defaultId, boolean synced) {
+        throw new UnsupportedOperationException("Platform expected");
+    }
 
 }

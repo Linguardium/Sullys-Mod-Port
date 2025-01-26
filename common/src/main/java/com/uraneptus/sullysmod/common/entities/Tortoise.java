@@ -1,14 +1,18 @@
 package com.uraneptus.sullysmod.common.entities;
 
-import com.uraneptus.sullysmod.common.blocks.TortoiseEggBlock;
+import com.uraneptus.sullysmod.common.entities.components.WorkstationHolder;
+import com.uraneptus.sullysmod.common.entities.components.workstations.AbstractWorkstation;
+import com.uraneptus.sullysmod.common.entities.components.workstations.Empty;
+import com.uraneptus.sullysmod.core.other.loot.SMBuiltInLootTables;
+import com.uraneptus.sullysmod.core.other.loot.SMLootUtil;
 import com.uraneptus.sullysmod.core.other.tags.SMEntityTags;
 import com.uraneptus.sullysmod.core.other.tags.SMItemTags;
 import com.uraneptus.sullysmod.core.registry.SMBlocks;
 import com.uraneptus.sullysmod.core.registry.SMEntityTypes;
-import com.uraneptus.sullysmod.core.registry.SMItems;
 import com.uraneptus.sullysmod.core.registry.SMSounds;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -33,12 +37,10 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.TurtleEggBlock;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
@@ -47,22 +49,27 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.function.Predicate;
 
-public class Tortoise extends Animal implements WorkstationAttachable {
+import static com.uraneptus.sullysmod.core.other.loot.SMLootUtil.buildEntityLootParams;
+
+public class Tortoise extends Animal implements WorkstationHolder {
     public static final EntityDataAccessor<Integer> HIDE_TIMER = SynchedEntityData.defineId(Tortoise.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> HAS_EGG = SynchedEntityData.defineId(Tortoise.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> LAYING_EGG = SynchedEntityData.defineId(Tortoise.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<ItemStack> WORKSTATION = SynchedEntityData.defineId(Tortoise.class, EntityDataSerializers.ITEM_STACK);
-    private static final EntityDataAccessor<ItemStack> RECORD_ITEM = SynchedEntityData.defineId(Tortoise.class, EntityDataSerializers.ITEM_STACK);
-    private static final EntityDataAccessor<Boolean> IS_RECORD_PLAYING = SynchedEntityData.defineId(Tortoise.class, EntityDataSerializers.BOOLEAN);
-    public static final Ingredient FOOD_ITEMS = Ingredient.of(SMItemTags.TORTOISE_FOOD);
+//    private static final EntityDataAccessor<ItemStack> RECORD_ITEM = SynchedEntityData.defineId(Tortoise.class, EntityDataSerializers.ITEM_STACK);
+//    private static final EntityDataAccessor<Boolean> IS_RECORD_PLAYING = SynchedEntityData.defineId(Tortoise.class, EntityDataSerializers.BOOLEAN);
+//    public static final Ingredient FOOD_ITEMS = Ingredient.of(SMItemTags.TORTOISE_FOOD);
     public final AnimationState hideState = new AnimationState();
     public final AnimationState hiddenState = new AnimationState();
     public final AnimationState reveal_state = new AnimationState();
     private int layEggCounter;
-    private long recordTickCount;
-    private long recordStartedTick;
-    private int ticksSinceLastEvent;
+//    private long recordTickCount;
+//    private long recordStartedTick;
+//    private int ticksSinceLastEvent;
+
+    public AbstractWorkstation<?> workstation = Empty.UNIT;
 
     public Tortoise(EntityType<? extends Animal> entityType, Level level) {
         super(entityType, level);
@@ -77,33 +84,35 @@ public class Tortoise extends Animal implements WorkstationAttachable {
     @Nullable
     @Override
     public AgeableMob getBreedOffspring(@NotNull ServerLevel level, @NotNull AgeableMob mob) {
-        return SMEntityTypes.TORTOISE.get().create(level);
+        return SMEntityTypes.TORTOISE.get().create(level, EntitySpawnReason.BREEDING);
     }
 
-    @Override
-    public float getScale() {
-        return this.isBaby() ? 0.15f : 1.0f;
-    }
-
-    @Override
-    public EntityDimensions getDimensions(Pose pPose) {
-        EntityDimensions dimensions;
-        float additionalHeight = this.hasAppliedWorkstation() ? 0.25F : 0.0F;
-
-        if (this.getHideTimerDuration() == 0) {
-            dimensions = super.getDimensions(pPose).scale(1.0F, 1.0F + additionalHeight);
-        } else {
-            dimensions = super.getDimensions(pPose).scale(1.0F, 0.8F + additionalHeight);
-        }
-        return dimensions;
-    }
+// TODO: scale and dimensions
+//
+//    @Override
+//    public float getScale() {
+//        return this.isBaby() ? 0.15f : 1.0f;
+//    }
+//
+//    @Override
+//    public EntityDimensions getDimensions(Pose pPose) {
+//        EntityDimensions dimensions;
+//        float additionalHeight = this.hasAppliedWorkstation() ? 0.25F : 0.0F;
+//
+//        if (this.getHideTimerDuration() == 0) {
+//            dimensions = super.getDimensions(pPose).scale(1.0F, 1.0F + additionalHeight);
+//        } else {
+//            dimensions = super.getDimensions(pPose).scale(1.0F, 0.8F + additionalHeight);
+//        }
+//        return dimensions;
+//    }
 
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(1, new FloatGoal(this));
         this.goalSelector.addGoal(2, new TortoiseBreedGoal(this, 0.5D));
         this.goalSelector.addGoal(3, new TortoiseLayEggGoal(this, 0.5));
-        this.goalSelector.addGoal(4, new RiderIgnoringTemptGoal(this, 0.45D, FOOD_ITEMS, false));
+        this.goalSelector.addGoal(4, new RiderIgnoringTemptGoal(this, 0.45D, this::isFood, false));
         this.goalSelector.addGoal(5, new RiderAllowingRandomStrollGoal(this, 0.4D));
         this.goalSelector.addGoal(6, new TortoiseLookAtPlayerGoal(this, Player.class, 6.0F));
         this.goalSelector.addGoal(7, new TortoiseLookAroundGoal(this));
@@ -143,26 +152,26 @@ public class Tortoise extends Animal implements WorkstationAttachable {
         } else super.knockback(pStrength * 0.25D, pX * 0.25D, pZ * 0.25D);
     }
 
-    @Override
-    public void remove(Entity.RemovalReason pReason) {
-        super.remove(pReason);
-        this.handleServerRemoval(this);
-    }
+//    @Override
+//    public void remove(Entity.RemovalReason pReason) {
+//        super.remove(pReason);
+//        this.handleServerRemoval(this);
+//    }
 
-    @Override
-    public void onClientRemoval() {
-        if (this.hasAppliedWorkstation() && !this.getRecordItem().isEmpty()) {
-
-        }
-        super.onClientRemoval();
-    }
+//    @Override
+//    public void onClientRemoval() {
+//        if (this.hasAppliedWorkstation() && !this.getRecordItem().isEmpty()) {
+//
+//        }
+//        super.onClientRemoval();
+//    }
 
     @Override
     public void tick() {
         super.tick();
         Level level = this.level();
 
-        this.handleJukeboxTick(this, level);
+        this.workstation.tick(this);
 
         //Hiding core stuff
         if (this.getHideTimerDuration() > 0) {
@@ -216,58 +225,69 @@ public class Tortoise extends Animal implements WorkstationAttachable {
     @Override
     protected void ageBoundaryReached() {
         super.ageBoundaryReached();
-        if (!this.isBaby() && this.level().getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
-            this.spawnAtLocation(new ItemStack(SMItems.TORTOISE_SCUTE.get(), 2));
-        }
+        if (!this.isBaby()) return;
+        if (!(this.level() instanceof ServerLevel serverLevel)) return;
+        if (!serverLevel.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) return;
+        serverLevel.registryAccess()
+            .get(SMLootUtil.createLootTableKey(SMBuiltInLootTables.TORTOISE_AGE_UP))
+            .map(Holder.Reference::value)
+            .ifPresent(lootTable->
+                lootTable.getRandomItems(
+                        buildEntityLootParams(serverLevel, this),
+                        this.getLootTableSeed(),
+                        stack->this.spawnAtLocation(serverLevel, stack)
+                ));
     }
 
-    @Override
-    public InteractionResult customInteraction(Player player, InteractionHand hand) {
-        ItemStack itemInHand = player.getItemInHand(hand);
-        if (this.isFood(itemInHand) || this.isBaby()) {
-            return super.mobInteract(player, hand);
-        }
-
-        if (!this.isVehicle() && !player.isShiftKeyDown()) {
-            if (!this.level().isClientSide) {
-                player.startRiding(this);
-                this.setHideTimerDuration(100);
-            }
-            this.gameEvent(GameEvent.ENTITY_INTERACT, null);
-            return InteractionResult.sidedSuccess(this.level().isClientSide);
-        }
-
-        return super.mobInteract(player, hand);
-    }
+//    TODO: Crouch interaction?
+//
+//    @Override
+//    public InteractionResult customInteraction(Player player, InteractionHand hand) {
+//        ItemStack itemInHand = player.getItemInHand(hand);
+//        if (this.isFood(itemInHand) || this.isBaby()) {
+//            return super.mobInteract(player, hand);
+//        }
+//
+//        if (!this.isVehicle() && !player.isShiftKeyDown()) {
+//            if (!this.level().isClientSide()) {
+//                player.startRiding(this);
+//                this.setHideTimerDuration(100);
+//            }
+//            this.gameEvent(GameEvent.ENTITY_INTERACT, null);
+//            return InteractionResult.SUCCESS;
+//        }
+//
+//        return super.mobInteract(player, hand);
+//    }
 
     @NotNull
     @Override
     public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
-        return this.workstationInteraction(pPlayer, pHand, this);
+        return this.SM$getWorkstation().useWithEmptyHand(this,pPlayer);
     }
 
     @Override
     public boolean isFood(@NotNull ItemStack stack) {
-        return FOOD_ITEMS.test(stack);
+        return stack.is(SMItemTags.TORTOISE_FOOD);
     }
 
-    @Override
-    protected float getStandingEyeHeight(@NotNull Pose pose, EntityDimensions size) {
-        return size.height * 0.45f;
-    }
+//    @Override
+//    protected float getStandingEyeHeight(@NotNull Pose pose, EntityDimensions size) {
+//        return size.height * 0.45f;
+//    }
 
     @Override
-    public double getPassengersRidingOffset() {
+    public Vec3 getPassengerRidingPosition(Entity passengerEntity) {
         if (this.hasPassenger(entity -> entity instanceof Villager)) {
             if (this.getHideTimerDuration() > 1) {
-                return super.getPassengersRidingOffset() + 0.3 * 0.5D;
+                return super.getPassengerRidingPosition(passengerEntity).multiply(1, 0.3 * 0.5D, 1);
             } else {
-                return super.getPassengersRidingOffset() + 0.3;
+                return super.getPassengerRidingPosition(passengerEntity).add(0,0.3,0);
             }
         }
         if (this.getHideTimerDuration() > 1) {
-            return super.getPassengersRidingOffset() * 0.75D;
-        } else return super.getPassengersRidingOffset();
+            return super.getPassengerRidingPosition(passengerEntity).multiply(1, 0.75D, 1);
+        } else return super.getPassengerRidingPosition(passengerEntity);
     }
 
     @Nullable
@@ -277,8 +297,7 @@ public class Tortoise extends Animal implements WorkstationAttachable {
     }
 
     @Override
-    public boolean hurt(@NotNull DamageSource source, float amount) {
-        Level level = this.level();
+    public boolean hurtServer(ServerLevel level, @NotNull DamageSource source, float amount) {
         if (this.getHideTimerDuration() > 1) {
             if (source.getDirectEntity() instanceof Projectile) {
                 level.playSound(null, this.blockPosition(), SMSounds.TORTOISE_HURT_HIDDEN.get(), SoundSource.AMBIENT, 1.0F, 1.0F);
@@ -286,14 +305,14 @@ public class Tortoise extends Animal implements WorkstationAttachable {
                 return false;
             } else {
                 this.setHideTimerDuration(200);
-                return super.hurt(source, amount * 0.5f);
+                return super.hurtServer(level, source, amount * 0.5f);
             }
         } else {
-            if (this.isInvulnerableTo(source)) {
+            if (this.isInvulnerableTo(level, source)) {
                 return false;
             } else {
                 this.setHideTimerDuration(205);
-                return super.hurt(source, amount);
+                return super.hurtServer(level, source, amount);
             }
         }
     }
@@ -329,7 +348,7 @@ public class Tortoise extends Animal implements WorkstationAttachable {
             if (this.getHideTimerDuration() == 0) {
                 level.playSound(null, this.blockPosition(), SMSounds.TORTOISE_HIDE.get(), SoundSource.AMBIENT, 1.0F, 1.0F);
             }
-            this.dropLeash(true, true);
+            this.dropLeash();
             this.entityData.set(HIDE_TIMER, durationInTicks);
             this.refreshDimensions();
         }
@@ -351,71 +370,16 @@ public class Tortoise extends Animal implements WorkstationAttachable {
         this.layEggCounter = pIsDigging ? 1 : 0;
         this.entityData.set(LAYING_EGG, pIsDigging);
     }
-
-    @Override
-    public long getRecordTickCount() {
-        return this.recordTickCount;
-    }
-
-    @Override
-    public void setRecordTickCount(long tickCount) {
-        this.recordTickCount = tickCount;
-    }
-
-    @Override
-    public long getRecordStartedTick() {
-        return this.recordStartedTick;
-    }
-
-    @Override
-    public void setRecordStartedTick(long startedTick) {
-        this.recordStartedTick = startedTick;
-    }
-
-    @Override
-    public boolean isRecordPlaying() {
-        return this.entityData.get(IS_RECORD_PLAYING);
-    }
-
-    @Override
-    public void setRecordPlaying(boolean isPlaying) {
-        this.entityData.set(IS_RECORD_PLAYING, isPlaying);
-    }
-
-    @Override
-    public int getTicksSinceLastEvent() {
-        return this.ticksSinceLastEvent;
-    }
-
-    @Override
-    public void setTicksSinceLastEvent(int ticksSinceLastEvent) {
-        this.ticksSinceLastEvent = ticksSinceLastEvent;
-    }
-
-    @Override
-    public ItemStack getRecordItem() {
-        return this.entityData.get(RECORD_ITEM);
-    }
-
-    @Override
-    public void setRecordItem(ItemStack itemStack) {
-        this.entityData.set(RECORD_ITEM, itemStack);
-    }
-
-    @Override
-    public ItemStack getAppliedWorkstation() {
-        return this.entityData.get(WORKSTATION);
-    }
-
-    @Override
-    public void setAppliedWorkstation(ItemStack itemStack) {
-        this.entityData.set(WORKSTATION, itemStack);
-    }
-
-    @Override
-    public boolean hasAppliedWorkstation() {
-        return !getAppliedWorkstation().isEmpty();
-    }
+//
+//    @Override
+//    public int getTicksSinceLastEvent() {
+//        return this.ticksSinceLastEvent;
+//    }
+//
+//    @Override
+//    public void setTicksSinceLastEvent(int ticksSinceLastEvent) {
+//        this.ticksSinceLastEvent = ticksSinceLastEvent;
+//    }
 
     @Override
     public boolean canFallInLove() {
@@ -423,31 +387,29 @@ public class Tortoise extends Animal implements WorkstationAttachable {
     }
 
     @Override
-    public boolean canBeLeashed(Player pPlayer) {
+    public boolean canBeLeashed() {
         return this.getHideTimerDuration() == 0;
     }
-
 
     public void aiStep() {
         super.aiStep();
         if (this.isAlive() && this.isLayingEgg() && this.layEggCounter >= 1 && this.layEggCounter % 5 == 0) {
             BlockPos blockpos = this.blockPosition();
-            if (TortoiseEggBlock.onDirt(this.level(), blockpos)) {
-                this.level().levelEvent(2001, blockpos, Block.getId(this.level().getBlockState(blockpos.below())));
-            }
+//  TODO: custom egg laying
+//
+//            if (TortoiseEggBlock.onDirt(this.level(), blockpos)) {
+//                this.level().levelEvent(2001, blockpos, Block.getId(this.level().getBlockState(blockpos.below())));
+//            }
         }
 
     }
 
     @Override
-    protected defineSynchedData(SynchedEntityData.Builder builder) {
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
-        this.entityData.define(HIDE_TIMER, 0);
-        this.entityData.define(HAS_EGG, false);
-        this.entityData.define(LAYING_EGG, false);
-        this.entityData.define(WORKSTATION, ItemStack.EMPTY);
-        this.entityData.define(RECORD_ITEM, ItemStack.EMPTY);
-        this.entityData.define(IS_RECORD_PLAYING, false);
+        builder.define(HIDE_TIMER, 0);
+        builder.define(HAS_EGG, false);
+        builder.define(LAYING_EGG, false);
     }
 
     @Override
@@ -455,7 +417,7 @@ public class Tortoise extends Animal implements WorkstationAttachable {
         super.addAdditionalSaveData(nbt);
         nbt.putInt("HideTimer", getHideTimerDuration());
         nbt.putBoolean("HasEgg", hasEgg());
-        this.addSaveData(nbt);
+        this.SM$saveWorkstation(nbt, this.level().registryAccess());
     }
 
     @Override
@@ -463,7 +425,17 @@ public class Tortoise extends Animal implements WorkstationAttachable {
         super.readAdditionalSaveData(nbt);
         this.setHideTimerDuration(nbt.getInt("HideTimer"));
         this.setHasEgg(nbt.getBoolean("HasEgg"));
-        this.readSaveData(nbt);
+        this.SM$loadWorkstation(nbt, this.level().registryAccess());
+    }
+
+    @Override
+    public AbstractWorkstation<?> SM$getWorkstation() {
+        return workstation;
+    }
+
+    @Override
+    public void SM$setWorkstation(AbstractWorkstation<?> workstation) {
+        this.workstation = workstation;
     }
 
     public static class RiderAllowingRandomStrollGoal extends RandomStrollGoal {
@@ -514,8 +486,8 @@ public class Tortoise extends Animal implements WorkstationAttachable {
     }
 
     public static class RiderIgnoringTemptGoal extends TemptGoal {
-        public RiderIgnoringTemptGoal(PathfinderMob pMob, double pSpeedModifier, Ingredient pItems, boolean pCanScare) {
-            super(pMob, pSpeedModifier, pItems, pCanScare);
+        public RiderIgnoringTemptGoal(PathfinderMob pMob, double pSpeedModifier, Predicate<ItemStack> predicate, boolean pCanScare) {
+            super(pMob, pSpeedModifier, predicate, pCanScare);
         }
 
         @Override

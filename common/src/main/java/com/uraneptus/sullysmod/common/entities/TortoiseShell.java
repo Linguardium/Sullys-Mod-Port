@@ -1,9 +1,13 @@
 package com.uraneptus.sullysmod.common.entities;
 
+import com.uraneptus.sullysmod.common.entities.components.WorkstationHolder;
+import com.uraneptus.sullysmod.common.entities.components.workstations.AbstractWorkstation;
+import com.uraneptus.sullysmod.common.entities.components.workstations.Empty;
 import com.uraneptus.sullysmod.core.other.tags.SMBlockTags;
 import com.uraneptus.sullysmod.core.registry.SMDamageTypes;
 import com.uraneptus.sullysmod.core.registry.SMItems;
 import com.uraneptus.sullysmod.core.registry.SMSounds;
+import com.uraneptus.sullysmod.mixins.DamageSourcesHelper;
 import net.minecraft.BlockUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -37,19 +41,19 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-public class TortoiseShell extends Entity implements OwnableEntity, WorkstationAttachable {
+public class TortoiseShell extends Entity implements OwnableEntity, WorkstationHolder {
     private static final EntityDataAccessor<Integer> DATA_ID_HURT = SynchedEntityData.defineId(TortoiseShell.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> DATA_ID_HURTDIR = SynchedEntityData.defineId(TortoiseShell.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Float> DATA_ID_DAMAGE = SynchedEntityData.defineId(TortoiseShell.class, EntityDataSerializers.FLOAT);
     protected static final EntityDataAccessor<Optional<UUID>> DATA_OWNERUUID_ID = SynchedEntityData.defineId(TortoiseShell.class, EntityDataSerializers.OPTIONAL_UUID);
     public static final EntityDataAccessor<Integer> SPIN_TICKS = SynchedEntityData.defineId(TortoiseShell.class, EntityDataSerializers.INT);
-    private static final EntityDataAccessor<ItemStack> WORKSTATION = SynchedEntityData.defineId(TortoiseShell.class, EntityDataSerializers.ITEM_STACK);
-    private static final EntityDataAccessor<ItemStack> RECORD_ITEM = SynchedEntityData.defineId(TortoiseShell.class, EntityDataSerializers.ITEM_STACK);
-    private static final EntityDataAccessor<Boolean> IS_RECORD_PLAYING = SynchedEntityData.defineId(TortoiseShell.class, EntityDataSerializers.BOOLEAN);
-    long recordTickCount;
-    long recordStartedTick;
-    int ticksSinceLastEvent;
-
+//    private static final EntityDataAccessor<ItemStack> WORKSTATION = SynchedEntityData.defineId(TortoiseShell.class, EntityDataSerializers.ITEM_STACK);
+//    private static final EntityDataAccessor<ItemStack> RECORD_ITEM = SynchedEntityData.defineId(TortoiseShell.class, EntityDataSerializers.ITEM_STACK);
+//    private static final EntityDataAccessor<Boolean> IS_RECORD_PLAYING = SynchedEntityData.defineId(TortoiseShell.class, EntityDataSerializers.BOOLEAN);
+//    long recordTickCount;
+//    long recordStartedTick;
+//    int ticksSinceLastEvent;
+    AbstractWorkstation<?> workstation = Empty.UNIT;
     public TortoiseShell(EntityType<? extends TortoiseShell> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.blocksBuilding = true;
@@ -77,7 +81,7 @@ public class TortoiseShell extends Entity implements OwnableEntity, WorkstationA
 
     @Override
     public EntityDimensions getDimensions(Pose pPose) {
-        float additionalHeight = this.hasAppliedWorkstation() ? 0.25F : 0.0F;
+        float additionalHeight = !this.SM$getWorkstation().isEmpty() ? 0.25F : 0.0F;
         return super.getDimensions(pPose).scale(1.0F, 1.0F + additionalHeight);
     }
 
@@ -88,9 +92,9 @@ public class TortoiseShell extends Entity implements OwnableEntity, WorkstationA
         builder.define(DATA_ID_DAMAGE, 0.0F);
         builder.define(SPIN_TICKS, 0);
         builder.define(DATA_OWNERUUID_ID, Optional.empty());
-        builder.define(WORKSTATION, ItemStack.EMPTY);
-        builder.define(RECORD_ITEM, ItemStack.EMPTY);
-        builder.define(IS_RECORD_PLAYING, false);
+//        builder.define(WORKSTATION, ItemStack.EMPTY);
+//        builder.define(RECORD_ITEM, ItemStack.EMPTY);
+//        builder.define(IS_RECORD_PLAYING, false);
     }
 
     public Integer getSpinTicksEntityData() {
@@ -114,32 +118,32 @@ public class TortoiseShell extends Entity implements OwnableEntity, WorkstationA
     public void setSpinTimer() {
         this.entityData.set(SPIN_TICKS, 22);
     }
-
-    @Override
-    public InteractionResult customInteraction(Player player, InteractionHand hand) {
-        double yLookAnglePlayer = player.getLookAngle().get(Direction.Axis.Y);
-        double y = this.getDeltaMovement().get(Direction.Axis.Y);
-        double x = this.getX() - player.getX();
-        double z = this.getZ() - player.getZ();
-        if (y == -0.0 && !this.isUnderWater() && (yLookAnglePlayer > -0.6D && yLookAnglePlayer < 0.1) && getSpinTicksEntityData() == 0) {
-            double d2 = Math.max(x * x + z * z, 0.001D);
-            this.setDeltaMovement(x / d2 * 2.1D, 0.05D, z / d2 * 2.1D);
-            setSpinTimer();
-            this.setOwner(player);
-            this.setYRot(player.getYRot());
-            this.yRotO = this.getYRot();
-            return InteractionResult.SUCCESS;
-        }
-
-        return InteractionResult.PASS;
-    }
+//
+//    @Override
+//    public InteractionResult customInteraction(Player player, InteractionHand hand) {
+//        double yLookAnglePlayer = player.getLookAngle().get(Direction.Axis.Y);
+//        double y = this.getDeltaMovement().get(Direction.Axis.Y);
+//        double x = this.getX() - player.getX();
+//        double z = this.getZ() - player.getZ();
+//        if (y == -0.0 && !this.isUnderWater() && (yLookAnglePlayer > -0.6D && yLookAnglePlayer < 0.1) && getSpinTicksEntityData() == 0) {
+//            double d2 = Math.max(x * x + z * z, 0.001D);
+//            this.setDeltaMovement(x / d2 * 2.1D, 0.05D, z / d2 * 2.1D);
+//            setSpinTimer();
+//            this.setOwner(player);
+//            this.setYRot(player.getYRot());
+//            this.yRotO = this.getYRot();
+//            return InteractionResult.SUCCESS;
+//        }
+//
+//        return InteractionResult.PASS;
+//    }
 
     @Override
     public InteractionResult interact(Player pPlayer, InteractionHand pHand) {
-        return this.workstationInteraction(pPlayer, pHand, this);
+        return this.SM$getWorkstation().useWithEmptyHand(this, pPlayer);
+//        return this.workstationInteraction(pPlayer, pHand, this);
     }
 
-    // TODO: convert to loot table. Maybe convert to block
     @Override
     public boolean hurtServer(ServerLevel level, DamageSource pSource, float pAmount) {
         if (pSource == this.damageSources().cactus() || pSource == this.damageSources().onFire() || pSource == this.damageSources().inFire()) {
@@ -216,10 +220,10 @@ public class TortoiseShell extends Entity implements OwnableEntity, WorkstationA
     }
 
     public void handleDamage(@Nullable LivingEntity owner, Entity entity) {
-        if (owner == null) {
-            entity.hurt(this.damageSources().source(SMDamageTypes.TORTOISE_SHELL, this, this), 4);
-        } else {
-            entity.hurt(this.damageSources().source(SMDamageTypes.TORTOISE_SHELL, this, owner), 4);
+        if (!(this.level() instanceof ServerLevel serverLevel)) return;
+        DamageSource source = ((DamageSourcesHelper)this.damageSources()).createSource(SMDamageTypes.TORTOISE_SHELL, this, owner == null ? this : owner);
+        entity.hurtServer(serverLevel, source, 4);
+        if (owner != null) {
             owner.setLastHurtMob(entity);
         }
     }
@@ -331,33 +335,31 @@ public class TortoiseShell extends Entity implements OwnableEntity, WorkstationA
         }
 
         super.tick();
-
-
-        this.handleJukeboxTick(this, level);
+        this.SM$getWorkstation().tick(this);
 
         if (!this.isNoGravity()) {
             double yVelocity = -0.04D;
-            FluidType fluidType = this.getEyeInFluidType();
-
-            if (fluidType != ForgeMod.EMPTY_TYPE.get()) {
-                yVelocity *= this.getFluidMotionScale(fluidType);
-            }
+// TODO: fluid slowing?
+//
+//            if (this.wasEyeInWater) {
+//                yVelocity *= this.getFluidMotionScale(fluidType);
+//            }
 
             this.setDeltaMovement(this.getDeltaMovement().add(0.0D, yVelocity, 0.0D));
         }
 
 
-        BlockPos bottomPosition = this.getBlockPosBelowThatAffectsMyMovement();
-        float friction = this.onGround() ? level.getBlockState(bottomPosition).getFriction(level, bottomPosition, this) * 1.55F : 1.55F;
-        float defaultFriction = this.level().getBlockState(bottomPosition).getFriction(level, bottomPosition, this);
+//        BlockPos bottomPosition = this.getBlockPosBelowThatAffectsMyMovement();
+//        float friction = this.onGround() ? level.getBlockState(bottomPosition).getBlock().getFriction() * 1.55F : 1.55F;
+//        float defaultFriction = this.level().getBlockState(bottomPosition).getBlock().getFriction();
 
-        double y = this.getDeltaMovement().get(Direction.Axis.Y);
-        if (y == -0.04 && !this.isInFluidType() && defaultFriction == 0.6F) {
-            this.setDeltaMovement(this.getDeltaMovement().multiply(friction, 0.98D, friction));
-        }
-        if (this.isInFluidType()) {
-            this.setDeltaMovement(this.getDeltaMovement().multiply(0.85, 1, 0.85));
-        }
+//        double y = this.getDeltaMovement().get(Direction.Axis.Y);
+//        if (y == -0.04 && !this.isInFluidType() && defaultFriction == 0.6F) {
+//            this.setDeltaMovement(this.getDeltaMovement().multiply(friction, 0.98D, friction));
+//        }
+//        if (this.isInFluidType()) {
+//            this.setDeltaMovement(this.getDeltaMovement().multiply(0.85, 1, 0.85));
+//        }
 
 
         if (this.getDeltaMovement() != Vec3.ZERO) {
@@ -370,19 +372,19 @@ public class TortoiseShell extends Entity implements OwnableEntity, WorkstationA
         }
     }
 
-    @Override
-    public void remove(Entity.RemovalReason pReason) {
-        super.remove(pReason);
-        this.handleServerRemoval(this);
-    }
+//    @Override
+//    public void remove(Entity.RemovalReason pReason) {
+//        super.remove(pReason);
+//        this.handleServerRemoval(this);
+//    }
 
-    @Override
-    public void onClientRemoval() {
-        if (this.hasAppliedWorkstation() && !this.getRecordItem().isEmpty()) {
-
-        }
-        super.onClientRemoval();
-    }
+//    @Override
+//    public void onClientRemoval() {
+//        if (this.hasAppliedWorkstation() && !this.getRecordItem().isEmpty()) {
+//
+//        }
+//        super.onClientRemoval();
+//    }
 
     @Override
     protected void addAdditionalSaveData(CompoundTag pCompound) {
@@ -390,7 +392,7 @@ public class TortoiseShell extends Entity implements OwnableEntity, WorkstationA
         if (this.getOwnerUUID() != null) {
             pCompound.putUUID("Owner", this.getOwnerUUID());
         }
-        this.addSaveData(pCompound);
+        this.SM$saveWorkstation(pCompound, this.level().registryAccess());
     }
 
     @Override
@@ -406,7 +408,7 @@ public class TortoiseShell extends Entity implements OwnableEntity, WorkstationA
         if (uuid != null) {
             this.setOwnerUUID(uuid);
         }
-        this.readSaveData(pCompound);
+        this.SM$loadWorkstation(pCompound, this.level().registryAccess());
     }
 
     public float getDamage() {
@@ -431,56 +433,66 @@ public class TortoiseShell extends Entity implements OwnableEntity, WorkstationA
     public ItemStack getPickResult() {
         return new ItemStack(this.getDropItem());
     }
+
     @Override
-    public ItemStack getAppliedWorkstation() {
-        return this.entityData.get(WORKSTATION);
+    public AbstractWorkstation<?> SM$getWorkstation() {
+        return workstation;
     }
+
     @Override
-    public void setAppliedWorkstation(ItemStack itemStack) {
-        this.entityData.set(WORKSTATION, itemStack);
+    public void SM$setWorkstation(AbstractWorkstation<?> workstation) {
+        this.workstation = workstation;
     }
-    @Override
-    public boolean hasAppliedWorkstation() {
-        return !getAppliedWorkstation().isEmpty();
-    }
-    @Override
-    public ItemStack getRecordItem() {
-        return this.entityData.get(RECORD_ITEM);
-    }
-    @Override
-    public void setRecordItem(ItemStack itemStack) {
-        this.entityData.set(RECORD_ITEM, itemStack);
-    }
-    @Override
-    public long getRecordTickCount() {
-        return this.tickCount;
-    }
-    @Override
-    public void setRecordTickCount(long tickCount) {
-        this.recordTickCount = tickCount;
-    }
-    @Override
-    public long getRecordStartedTick() {
-        return this.recordStartedTick;
-    }
-    @Override
-    public void setRecordStartedTick(long startedTick) {
-        this.recordStartedTick = startedTick;
-    }
-    @Override
-    public boolean isRecordPlaying() {
-        return this.entityData.get(IS_RECORD_PLAYING);
-    }
-    @Override
-    public void setRecordPlaying(boolean isPlaying) {
-        this.entityData.set(IS_RECORD_PLAYING, isPlaying);
-    }
-    @Override
-    public int getTicksSinceLastEvent() {
-        return this.ticksSinceLastEvent;
-    }
-    @Override
-    public void setTicksSinceLastEvent(int ticksSinceLastEvent) {
-        this.ticksSinceLastEvent = ticksSinceLastEvent;
-    }
+//    @Override
+//    public ItemStack getAppliedWorkstation() {
+//        return this.entityData.get(WORKSTATION);
+//    }
+//    @Override
+//    public void setAppliedWorkstation(ItemStack itemStack) {
+//        this.entityData.set(WORKSTATION, itemStack);
+//    }
+//    @Override
+//    public boolean hasAppliedWorkstation() {
+//        return !getAppliedWorkstation().isEmpty();
+//    }
+//    @Override
+//    public ItemStack getRecordItem() {
+//        return this.entityData.get(RECORD_ITEM);
+//    }
+//    @Override
+//    public void setRecordItem(ItemStack itemStack) {
+//        this.entityData.set(RECORD_ITEM, itemStack);
+//    }
+//    @Override
+//    public long getRecordTickCount() {
+//        return this.tickCount;
+//    }
+//    @Override
+//    public void setRecordTickCount(long tickCount) {
+//        this.recordTickCount = tickCount;
+//    }
+//    @Override
+//    public long getRecordStartedTick() {
+//        return this.recordStartedTick;
+//    }
+//    @Override
+//    public void setRecordStartedTick(long startedTick) {
+//        this.recordStartedTick = startedTick;
+//    }
+//    @Override
+//    public boolean isRecordPlaying() {
+//        return this.entityData.get(IS_RECORD_PLAYING);
+//    }
+//    @Override
+//    public void setRecordPlaying(boolean isPlaying) {
+//        this.entityData.set(IS_RECORD_PLAYING, isPlaying);
+//    }
+//    @Override
+//    public int getTicksSinceLastEvent() {
+//        return this.ticksSinceLastEvent;
+//    }
+//    @Override
+//    public void setTicksSinceLastEvent(int ticksSinceLastEvent) {
+//        this.ticksSinceLastEvent = ticksSinceLastEvent;
+//    }
 }

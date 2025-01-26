@@ -1,26 +1,15 @@
 package com.uraneptus.sullysmod.fabric.datagen;
 
-import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.datagen.v1.DataGeneratorEntrypoint;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
-import net.fabricmc.fabric.api.datagen.v1.provider.FabricDynamicRegistryProvider;
-import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.data.PackOutput;
-import net.minecraft.data.structures.NbtToSnbt;
-import net.minecraft.data.structures.SnbtToNbt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Optional;
-
-import static com.uraneptus.sullysmod.SullysMod.MOD_ID;
 
 public final class SullysModDatagenFabric implements DataGeneratorEntrypoint {
     private static final Logger LOGGER = LoggerFactory.getLogger(SullysModDatagenFabric.class);
@@ -29,6 +18,8 @@ public final class SullysModDatagenFabric implements DataGeneratorEntrypoint {
 
     public void registerDatagenProviders(FabricDataGenerator.Pack pack) {
         pack.addProvider(SMNeoForgeDataMapProvider::new);
+        pack.addProvider(SMTranslationProviderEnUs::new);
+        pack.addProvider(SMModelProvider::new);
     }
 
     public void registerStructureSerializer(FabricDataGenerator.Pack pack) {

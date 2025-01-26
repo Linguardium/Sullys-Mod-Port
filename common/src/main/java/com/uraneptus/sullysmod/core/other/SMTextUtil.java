@@ -3,8 +3,10 @@ package com.uraneptus.sullysmod.core.other;
 import com.google.common.collect.ImmutableMap;
 import com.uraneptus.sullysmod.SullysMod;
 import com.uraneptus.sullysmod.common.blocks.AncientSkullBlock;
+import com.uraneptus.sullysmod.core.registry.SMWorkstationTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.HashMap;
@@ -47,5 +49,13 @@ public class SMTextUtil {
 
     public static String convertSkullTypeToString(AncientSkullBlock.Types type) {
         return type.toString().toLowerCase();
+    }
+
+    public static String getContainerKey(ResourceLocation id) {
+        return String.join(".","container",id.getNamespace(),id.getPath());
+    }
+
+    public static String getWorkstationKey(SMWorkstationTypes.WorkstationType<?> type) {
+        return String.join(".","container",type.id().getNamespace(),"workstation",type.id().getPath());
     }
 }
