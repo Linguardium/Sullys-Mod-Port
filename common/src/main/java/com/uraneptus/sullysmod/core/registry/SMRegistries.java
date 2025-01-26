@@ -5,6 +5,8 @@ import dev.architectury.injectables.annotations.ExpectPlatform;
 import dev.architectury.registry.registries.Registrar;
 import dev.architectury.registry.registries.RegistrarManager;
 import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -46,6 +48,9 @@ public class SMRegistries {
     public static final Registrar<RecipeSerializer<?>> RECIPE_SERIALIZERS = MANAGER.get().get(Registries.RECIPE_SERIALIZER);
     public static final Registrar<RecipeType<?>> RECIPE_TYPES = MANAGER.get().get(Registries.RECIPE_TYPE);
     public static final Registrar<LootItemConditionType> LOOT_CONDITION_TYPES = MANAGER.get().get(Registries.LOOT_CONDITION_TYPE);
+    public static final Registrar<ParticleType<?>> PARTICLE_TYPES = MANAGER.get().get(Registries.PARTICLE_TYPE);
+    public static final Registrar<DataComponentType<?>> DATA_COMPONENT_TYPES = MANAGER.get().get(Registries.DATA_COMPONENT_TYPE);
+
     public static final Registrar<SMWorkstationTypes.WorkstationType<?>> WORKSTATION_TYPES = MANAGER.get().get(WORKSTATION_TYPE_KEY);
 
     public static void init() { }

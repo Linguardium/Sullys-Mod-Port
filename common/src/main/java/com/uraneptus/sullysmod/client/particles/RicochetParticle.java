@@ -3,22 +3,16 @@ package com.uraneptus.sullysmod.client.particles;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import com.uraneptus.sullysmod.common.particletypes.DirectionParticleOptions;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.*;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-import javax.annotation.ParametersAreNonnullByDefault;
 
-@ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public class RicochetParticle extends TextureSheetParticle {
     private final SpriteSet animatedSprite;
     private final Direction face;
@@ -70,18 +64,18 @@ public class RicochetParticle extends TextureSheetParticle {
         }
 
         int light = this.getLightColor(partialTicks);
-        vertexConsumer.vertex(faces[0].x(), faces[0].y(), faces[0].z()).uv(this.getU1(), this.getV1()).color(this.rCol, this.gCol, this.bCol, this.alpha).uv2(light).endVertex();
-        vertexConsumer.vertex(faces[1].x(), faces[1].y(), faces[1].z()).uv(this.getU1(), this.getV0()).color(this.rCol, this.gCol, this.bCol, this.alpha).uv2(light).endVertex();
-        vertexConsumer.vertex(faces[2].x(), faces[2].y(), faces[2].z()).uv(this.getU0(), this.getV0()).color(this.rCol, this.gCol, this.bCol, this.alpha).uv2(light).endVertex();
-        vertexConsumer.vertex(faces[3].x(), faces[3].y(), faces[3].z()).uv(this.getU0(), this.getV1()).color(this.rCol, this.gCol, this.bCol, this.alpha).uv2(light).endVertex();
+        vertexConsumer.addVertex(faces[0].x(), faces[0].y(), faces[0].z()).setUv(this.getU1(), this.getV1()).setColor(this.rCol, this.gCol, this.bCol, this.alpha).setLight(light);
+        vertexConsumer.addVertex(faces[1].x(), faces[1].y(), faces[1].z()).setUv(this.getU1(), this.getV0()).setColor(this.rCol, this.gCol, this.bCol, this.alpha).setLight(light);
+        vertexConsumer.addVertex(faces[2].x(), faces[2].y(), faces[2].z()).setUv(this.getU0(), this.getV0()).setColor(this.rCol, this.gCol, this.bCol, this.alpha).setLight(light);
+        vertexConsumer.addVertex(faces[3].x(), faces[3].y(), faces[3].z()).setUv(this.getU0(), this.getV1()).setColor(this.rCol, this.gCol, this.bCol, this.alpha).setLight(light);
     }
 
     @Override
     public ParticleRenderType getRenderType() {
-        return ParticleRenderType.PARTICLE_SHEET_LIT;
+        return ParticleRenderType.PARTICLE_SHEET_OPAQUE;
     }
 
-    @OnlyIn(Dist.CLIENT)
+
     public static class RicochetParticleProvider implements ParticleProvider<DirectionParticleOptions> {
         private final SpriteSet sprites;
 
