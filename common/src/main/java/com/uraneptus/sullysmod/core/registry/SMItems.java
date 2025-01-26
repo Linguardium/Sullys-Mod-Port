@@ -8,7 +8,10 @@ import com.uraneptus.sullysmod.core.other.SMTextUtil;
 import dev.architectury.core.item.ArchitecturyBucketItem;
 import dev.architectury.core.item.ArchitecturySpawnEggItem;
 import dev.architectury.registry.registries.RegistrySupplier;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
@@ -21,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.uraneptus.sullysmod.core.other.SMLocationUtil.location;
@@ -113,26 +117,26 @@ public class SMItems {
     public static final RegistrySupplier<Item> TORN_CLOTH = registerArtifact("torn_cloth", "A dirty torn off piece of clothing", 6);
     public static final RegistrySupplier<Item> GOLDEN_GOBLET = registerArtifact("golden_goblet", "An old but beautiful chalice made by a skilled goldsmith", 29);
     public static final RegistrySupplier<Item> EMERALD_EARRING = registerArtifact("emerald_earring", "Besides the beautiful emerald, it looks sloppily put together", 17);
-    public static final RegistrySupplier<Item> BROKEN_BOTTLE = registerArtifact("broken_bottle", "The top half of a bottle", () -> new ArtifactWeaponItem(SMToolMaterials.GLASS, SMSounds.BROKEN_BOTTLE_SHATTERS, SMProperties.Items.artifacts().stacksTo(1)), 5);
+    public static final RegistrySupplier<Item> BROKEN_BOTTLE = registerArtifact("broken_bottle", "The top half of a bottle", (properties) -> new ArtifactWeaponItem(SMToolMaterials.GLASS, SMSounds.BROKEN_BOTTLE_SHATTERS, properties), SMProperties.Items.artifacts().stacksTo(1), 5);
     public static final RegistrySupplier<Item> FROG_IDOL = registerArtifact("frog_idol", "Everybody likes frogs", 29);
 
     private static RegistrySupplier<Item> registerArtifact(String name, String description, int price) {
-        return registerArtifact(name, description, () -> new Item(SMProperties.Items.artifacts()), price);
+        return registerArtifact(name, description, Item::new, SMProperties.Items.artifacts(), price);
     }
 
-    private static <I extends Item> RegistrySupplier<I> registerArtifact(String name, String description, Supplier<I> item, int price) {
-        RegistrySupplier<I> object = createItem(name, item, true);
+    private static <I extends Item> RegistrySupplier<I> registerArtifact(String name, String description, Function<Item.Properties, I> factory, Item.Properties properties, int price) {
+        RegistrySupplier<I> object = createItem(name, factory, properties, true);
         ARTIFACT_DESC_MAP.put(object, SMTextUtil.addSMTranslatable("artifact." + name + ".desc", description).withStyle(SMTextDefinitions.ARTIFACT_DESC_STYLE));
         TRADES.put(object, price);
         return object;
     }
 
     private static RegistrySupplier<Item> createSpawnEggItem(String name, RegistrySupplier<EntityType<? extends Mob>> supplier, int primaryColor, int secondaryColor) {
-        return createItem(name + "_spawn_egg", () -> new ArchitecturySpawnEggItem(supplier, new Item.Properties()));
+        return createItem(name + "_spawn_egg", (properties) -> new ArchitecturySpawnEggItem(supplier, properties), new Item.Properties());
     }
 
     private static RegistrySupplier<Item> createMobBucketItem(String name, Supplier<EntityType<? extends WaterAnimal>> entityType) {
-        return createItem(name, () -> new MobBucketItem(entityType.get(), Fluids.WATER, SoundEvents.BUCKET_EMPTY_FISH, SMProperties.Items.singleStack()), true);
+        return createItem(name, (settings) -> new MobBucketItem(entityType.get(), Fluids.WATER, SoundEvents.BUCKET_EMPTY_FISH, settings), SMProperties.Items.singleStack(), true);
     }
 
     private static RegistrySupplier<Item> createItem(String name, boolean customTranslation) {
@@ -144,21 +148,23 @@ public class SMItems {
     }
 
     private static RegistrySupplier<Item> createItem(String name, Item.Properties properties, boolean customTranslation) {
-        return createItem(name, () -> new Item(properties), customTranslation);
+        return createItem(name, Item::new, properties, customTranslation);
     }
 
     private static RegistrySupplier<Item> createItem(String name, Item.Properties properties) {
-        return createItem(name, () -> new Item(properties));
+        return createItem(name, Item::new, properties);
     }
 
-    private static <I extends Item> RegistrySupplier<I> createItem(String name, Supplier<I> supplier, boolean customTranslation) {
-        RegistrySupplier<I> item = createItem(name, supplier);
+    private static <I extends Item> RegistrySupplier<I> createItem(String name, Function<Item.Properties, I> factory, Item.Properties properties, boolean customTranslation) {
+        RegistrySupplier<I> item = createItem(name, factory, properties);
         if (customTranslation) AUTO_TRANSLATE.remove(item);
         return item;
     }
 
-    public static <I extends Item> RegistrySupplier<I> createItem(String name, Supplier<I> supplier) {
-        RegistrySupplier<I> item = ITEMS.register(location(name), supplier);
+    public static <I extends Item> RegistrySupplier<I> createItem(String name, Function<Item.Properties, I> factory, Item.Properties properties) {
+        ResourceLocation id = location(name);
+        ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, id);
+        RegistrySupplier<I> item = ITEMS.register(id, ()->factory.apply(properties.setId(key)));
         AUTO_TRANSLATE.add(item);
         return item;
     }
