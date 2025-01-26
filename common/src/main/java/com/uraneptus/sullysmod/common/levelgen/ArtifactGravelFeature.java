@@ -2,6 +2,7 @@ package com.uraneptus.sullysmod.common.levelgen;
 
 import com.mojang.serialization.Codec;
 import com.uraneptus.sullysmod.core.other.loot.SMBuiltInLootTables;
+import com.uraneptus.sullysmod.core.other.loot.SMLootUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
@@ -26,7 +27,7 @@ public class ArtifactGravelFeature extends Feature<SimpleBlockConfiguration> {
         if (blockstate.is(Blocks.SUSPICIOUS_GRAVEL)) {
             worldgenlevel.setBlock(blockpos, blockstate, 2);
             context.level().getBlockEntity(blockpos, BlockEntityType.BRUSHABLE_BLOCK).ifPresent(brushableBlockEntity -> {
-                brushableBlockEntity.setLootTable(SMBuiltInLootTables.OVERWORLD_ARTIFACTS, blockpos.asLong());
+                brushableBlockEntity.setLootTable(SMLootUtil.createLootTableKey(SMBuiltInLootTables.OVERWORLD_ARTIFACTS), blockpos.asLong());
             });
             return true;
         } else {

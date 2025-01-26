@@ -1,6 +1,5 @@
 package com.uraneptus.sullysmod.common.blockentities;
 
-import com.uraneptus.sullysmod.common.blocks.utilities.AmberUtil;
 import com.uraneptus.sullysmod.core.registry.SMBlockEntityTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -28,6 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import static com.uraneptus.sullysmod.core.other.SMBlockStateProperties.IS_MELTED;
 import static net.minecraft.core.component.DataComponents.ENTITY_DATA;
 
 public class AmberBE extends BlockEntity {
@@ -79,7 +79,7 @@ public class AmberBE extends BlockEntity {
         Level level = this.getLevel();
         if (level == null) return;
 
-        level.setBlock(this.getBlockPos(), this.getBlockState().setValue(AmberUtil.IS_MELTED, false), Block.UPDATE_ALL);
+        level.setBlock(this.getBlockPos(), this.getBlockState().setValue(IS_MELTED, false), Block.UPDATE_ALL);
 
         CustomData entityData = saveEntityToCustomData(entity, true);
         if (entityData.isEmpty()) return;

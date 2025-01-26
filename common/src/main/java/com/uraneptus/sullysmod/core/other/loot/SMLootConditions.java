@@ -17,7 +17,7 @@ public class SMLootConditions {
         return biomeConditionCheck(Biomes.MANGROVE_SWAMP)
                 .or(isJungle());
     }
-
+// TODO: biome tags
     public static LootItemCondition.Builder isJungle() {
         return biomeConditionCheck(Biomes.JUNGLE)
                 .or(biomeConditionCheck(Biomes.SPARSE_JUNGLE))
@@ -62,6 +62,6 @@ public class SMLootConditions {
 
 
     public static LootItemCondition.Builder biomeConditionCheck(ResourceKey<Biome> biome) {
-        return LocationCheck.checkLocation(LocationPredicate.Builder.location().setBiome(biome));
+        return null; //LocationCheck.checkLocation(LocationPredicate.Builder.location().setBiomes( .setBiome(biome));
     }
 }

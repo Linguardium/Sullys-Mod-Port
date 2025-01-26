@@ -8,6 +8,7 @@ import dev.architectury.core.fluid.ArchitecturyFlowingFluid;
 import dev.architectury.core.fluid.ArchitecturyFluidAttributes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.FluidTags;
@@ -28,7 +29,7 @@ import java.util.function.Predicate;
 public class MoltenAmberFluid extends ArchitecturyFlowingFluid.Flowing {
     public static final float MIN_LEVEL_CUTOFF = 0.44444445F;
     public static final Predicate<BlockState> MELTS_AMBER = state->state.is(SMBlockTags.MELTS_AMBER);
-    public static final Predicate<BlockState> NOT_MOLTEN_AMBER = (state->state.is(SMBlocks.MOLTEN_AMBER_BLOCK.get())).negate();
+    public static final Predicate<BlockState> NOT_MOLTEN_AMBER = (BlockState state)->!state.is(SMBlocks.MOLTEN_AMBER_BLOCK.get());
     public static final Predicate<BlockState> MELTS_AMBER_WITHOUT_AMBER = MELTS_AMBER.and(NOT_MOLTEN_AMBER);
     public MoltenAmberFluid(ArchitecturyFluidAttributes attributes) {
         super(attributes);
@@ -95,7 +96,7 @@ public class MoltenAmberFluid extends ArchitecturyFlowingFluid.Flowing {
         return fluidState.getValue(LEVEL);
     }
 
-    protected boolean canConvertToSource(Level pLevel) {
+    protected boolean canConvertToSource(ServerLevel pLevel) {
         return pLevel.getGameRules().getBoolean(GameRules.RULE_LAVA_SOURCE_CONVERSION);
     }
 
@@ -105,7 +106,7 @@ public class MoltenAmberFluid extends ArchitecturyFlowingFluid.Flowing {
             FluidState fluidstate = pLevel.getFluidState(pPos);
             if (fluidstate.is(FluidTags.WATER)) {
                 if (pBlockState.getBlock() instanceof LiquidBlock) {
-                    pLevel.setBlock(pPos, ForgeEventFactory.fireFluidPlaceBlockEvent(pLevel, pPos, pPos, SMBlocks.AMBER.get().defaultBlockState()), 3);
+                    pLevel.setBlock(pPos, SMBlocks.AMBER.get().defaultBlockState(), LiquidBlock.UPDATE_ALL);
                 }
 
                 return;

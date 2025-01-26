@@ -12,12 +12,12 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
+import static com.uraneptus.sullysmod.core.other.SMBlockStateProperties.IS_MELTED;
+
 public class AmberRotatedPillarBlock extends RotatedPillarBlock {
-    public static final BooleanProperty IS_MELTED = AmberUtil.IS_MELTED;
 
     public AmberRotatedPillarBlock(Properties pProperties) {
         super(pProperties);

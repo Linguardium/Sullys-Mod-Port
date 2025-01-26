@@ -3,6 +3,7 @@ package com.uraneptus.sullysmod.common.levelgen;
 import com.google.common.collect.Lists;
 import com.mojang.serialization.MapCodec;
 import com.uraneptus.sullysmod.core.other.loot.SMBuiltInLootTables;
+import com.uraneptus.sullysmod.core.other.loot.SMLootUtil;
 import com.uraneptus.sullysmod.core.registry.SMTreeDecoratorTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.random.SimpleWeightedRandomList;
@@ -84,9 +85,9 @@ public class PetrifiedTreeGravelDecorator extends TreeDecorator {
             if (Feature.isGrassOrDirt(pContext.level(), blockpos)) {
                 BlockState state = this.provider.getState(pContext.random(), pPos);
                 pContext.level().getBlockEntity(pPos, BlockEntityType.BRUSHABLE_BLOCK).ifPresent(brushableBlockEntity -> {
-                    brushableBlockEntity.setLootTable(SMBuiltInLootTables.GRAVEL_PETRIFIED_SAPLING_TREE, pPos.asLong());
+                    brushableBlockEntity.setLootTable(SMLootUtil.createLootTableKey(SMBuiltInLootTables.GRAVEL_PETRIFIED_SAPLING_TREE), pPos.asLong());
                 });
-                pContext.setBlock(blockpos, ForgeEventFactory.alterGround(pContext.level(), pContext.random(), blockpos, state));
+                pContext.setBlock(blockpos, state);
                 break;
             }
             if (!pContext.isAir(blockpos) && i < 0) {

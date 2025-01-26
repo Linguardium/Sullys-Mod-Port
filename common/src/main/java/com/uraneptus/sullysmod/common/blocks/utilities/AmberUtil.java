@@ -41,6 +41,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import static com.uraneptus.sullysmod.core.other.SMBlockStateProperties.IS_MELTED;
 import static com.uraneptus.sullysmod.mixins.PointedDripstoneDrippingLogic.findFillableCauldronBelow;
 import static net.minecraft.core.cauldron.CauldronInteraction.emptyBucket;
 import static net.minecraft.core.cauldron.CauldronInteraction.fillBucket;
@@ -112,7 +113,7 @@ public class AmberUtil {
     public static void fillCauldronBehavior(BlockState amberState, ServerLevel level, BlockPos blockPos) {
         if (!amberState.hasProperty(IS_MELTED) || !amberState.getValue(IS_MELTED)) return;
 
-        BlockPos cauldronPos = findFillableCauldronBelow(level, blockPos, SMFluids.SOURCE_MOLTEN_AMBER);
+        BlockPos cauldronPos = findFillableCauldronBelow(level, blockPos, SMFluids.SOURCE_MOLTEN_AMBER.get());
         if (cauldronPos == null) return;
 
         BlockState cauldronState = level.getBlockState(cauldronPos);
@@ -127,7 +128,7 @@ public class AmberUtil {
             cauldronState = cauldronState.setValue(BlockStateProperties.LEVEL_CAULDRON, fluidLevel);
         }
         level.setBlockAndUpdate(cauldronPos, cauldronState);
-        level.gameEvent(GameEvent.BLOCK_CHANGE, cauldronPos, GameEvent.Context.of(blockstate));
+        level.gameEvent(GameEvent.BLOCK_CHANGE, cauldronPos, GameEvent.Context.of(cauldronState));
         level.levelEvent(LevelEvent.SOUND_DRIP_WATER_INTO_CAULDRON, cauldronPos, 0);
     }
 

@@ -10,9 +10,7 @@ import net.minecraft.world.entity.ai.goal.RemoveBlockGoal;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 
-import javax.annotation.ParametersAreNonnullByDefault;
-
-@ParametersAreNonnullByDefault
+// TODO: add egg goal?
 public class GenericMobAttackTortoiseEggGoal extends RemoveBlockGoal {
     public GenericMobAttackTortoiseEggGoal(PathfinderMob mob, double pSpeedModifier, int pSearchRange) {
         super(SMBlocks.TORTOISE_EGG.get(), mob, pSpeedModifier, pSearchRange);

@@ -99,7 +99,7 @@ public class AmberBlock extends Block implements EntityBlock {
             BlockState neighborState = pLevel.getBlockState(neighborPos);
             if (!neighborState.is(SMBlocks.AMBER.get())) continue;
             if (!(pLevel.getBlockEntity(neighborPos) instanceof AmberBE amberBE) || !amberBE.hasStuckEntity()) continue;
-            CompoundTag compoundtag = amberBE.getEntityStuck();
+            CompoundTag compoundtag = amberBE.getEntityStuck().copyTag();
             Entity entityLoaded = EntityType.loadEntityRecursive(compoundtag,level, EntitySpawnReason.EVENT, loadedEntity->loadedEntity);
             if (entityLoaded != null) {
                 if (entityLoaded.getBoundingBox().getYsize() > 1.5F && entityLoaded.getBoundingBox().getYsize() < 2F && neighborPos.equals(pos.offset(0, -1, 0))) {
@@ -173,7 +173,7 @@ public class AmberBlock extends Block implements EntityBlock {
         BlockEntity blockEntity = pLevel.getBlockEntity(pos);
         if (blockEntity instanceof AmberBE amber) {
             if (!amber.hasStuckEntity() && state.getValue(IS_MELTED)) {
-                if (!(pEntity instanceof LivingEntity) || pEntity.getFeetBlockState().is(this)) {
+                if (!(pEntity instanceof LivingEntity) || pEntity.getBlockStateOn().is(this)) {
                     if (pEntity instanceof Player) {
                         pEntity.makeStuckInBlock(state, new Vec3(0.8F, 0.1D, 0.8F));
                     }

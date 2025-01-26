@@ -1,7 +1,6 @@
 package com.uraneptus.sullysmod.common.items;
 
 import com.uraneptus.sullysmod.common.entities.JungleSpider;
-import com.uraneptus.sullysmod.core.other.SMItemUtil;
 import com.uraneptus.sullysmod.core.registry.SMItems;
 import com.uraneptus.sullysmod.core.registry.SMSounds;
 import net.minecraft.sounds.SoundSource;
@@ -12,7 +11,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.registries.ForgeRegistries;
+
 
 public class VialItem extends Item {
     public VialItem(Properties properties) {
@@ -23,11 +22,12 @@ public class VialItem extends Item {
     public InteractionResult interactLivingEntity(ItemStack stack, Player player, LivingEntity target, InteractionHand hand) {
         if (target instanceof JungleSpider jungleSpider && hand.equals(InteractionHand.MAIN_HAND)) {
             ItemStack vialStack = new ItemStack(SMItems.VENOM_VIAL.get());
-            vialStack.getOrCreateTag().putString("beneficialEffect", ForgeRegistries.MOB_EFFECTS.getKey(jungleSpider.getBeneficialVenomEffect()).toString());
-            vialStack.getOrCreateTag().putString("harmfulEffect", ForgeRegistries.MOB_EFFECTS.getKey(jungleSpider.getHarmfulVenomEffect()).toString());
+            // TODO: vial item component
+//            vialStack.getOrCreateTag().putString("beneficialEffect", ForgeRegistries.MOB_EFFECTS.getKey(jungleSpider.getBeneficialVenomEffect()).toString());
+//            vialStack.getOrCreateTag().putString("harmfulEffect", ForgeRegistries.MOB_EFFECTS.getKey(jungleSpider.getHarmfulVenomEffect()).toString());
 
             this.createFilledVialResult(stack, player, target, vialStack);
-            return InteractionResult.sidedSuccess(player.level().isClientSide);
+            return InteractionResult.SUCCESS;
         }
         return super.interactLivingEntity(stack, player, target, hand);
     }
@@ -44,7 +44,7 @@ public class VialItem extends Item {
                 if (!pPlayer.getInventory().add(pFilledStack)) {
                     pPlayer.drop(pFilledStack, false);
                 }
-                SMItemUtil.nonCreativeShrinkStack(pPlayer, pEmptyStack);
+                pEmptyStack.consume(1, pPlayer);
                 pPlayer.level().playSound(soundTarget, soundTarget.getOnPos(), SMSounds.VIAL_FILLS.get(), SoundSource.NEUTRAL, 1.0F, 1.0F);
                 pPlayer.awardStat(Stats.ITEM_USED.get(this));
             }

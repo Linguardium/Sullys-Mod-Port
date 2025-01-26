@@ -2,47 +2,43 @@ package com.uraneptus.sullysmod.common.items;
 
 import com.uraneptus.sullysmod.core.registry.SMSounds;
 import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ItemUtils;
-import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.*;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraftforge.registries.ForgeRegistries;
 
-import javax.annotation.Nullable;
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class VenomVialItem extends Item {
     public VenomVialItem(Properties properties) {
         super(properties);
     }
 
+    // TODO: Venom item data component
+
     @Override
     public ItemStack getDefaultInstance() {
         ItemStack stack = super.getDefaultInstance();
-        stack.getOrCreateTag().putString("beneficialEffect", "minecraft:speed");
-        stack.getOrCreateTag().putString("harmfulEffect", "minecraft:poison");
+//        stack.getOrCreateTag().putString("beneficialEffect", "minecraft:speed");
+//        stack.getOrCreateTag().putString("harmfulEffect", "minecraft:poison");
         return stack;
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
         return ItemUtils.startUsingInstantly(level, player, hand);
     }
 
@@ -54,17 +50,17 @@ public class VenomVialItem extends Item {
             CriteriaTriggers.CONSUME_ITEM.trigger(serverPlayer, stack);
         }
 
-        if (!level.isClientSide) {
+        if (level instanceof ServerLevel serverLevel) {
             MobEffectInstance beneficialInstance = new MobEffectInstance(getBeneficialEffect(stack), 200, 0);
             MobEffectInstance harmfulInstance = new MobEffectInstance(getHarmfulEffect(stack), 200, 0);
 
-            if (getBeneficialEffect(stack).isInstantenous()) {
-                beneficialInstance.getEffect().applyInstantenousEffect(player, player, livingEntity, beneficialInstance.getAmplifier(), 1.0D);
+            if (getBeneficialEffect(stack).value().isInstantenous()) {
+                beneficialInstance.getEffect().value().applyInstantenousEffect(serverLevel, player, player, livingEntity, beneficialInstance.getAmplifier(), 1.0D);
             }
             else livingEntity.addEffect(beneficialInstance);
 
-            if (getHarmfulEffect(stack).isInstantenous()) {
-                harmfulInstance.getEffect().applyInstantenousEffect(player, player, livingEntity, harmfulInstance.getAmplifier(), 1.0D);
+            if (getHarmfulEffect(stack).value().isInstantenous()) {
+                harmfulInstance.getEffect().value().applyInstantenousEffect(serverLevel, player, player, livingEntity, harmfulInstance.getAmplifier(), 1.0D);
             }
             else livingEntity.addEffect(harmfulInstance);
         }
@@ -83,53 +79,55 @@ public class VenomVialItem extends Item {
     }
 
     @Override
-    public UseAnim getUseAnimation(ItemStack pStack) {
-        return UseAnim.DRINK;
+    public ItemUseAnimation getUseAnimation(ItemStack pStack) {
+        return ItemUseAnimation.DRINK;
     }
 
     @Override
-    public int getUseDuration(ItemStack pStack) {
+    public int getUseDuration(ItemStack pStack, LivingEntity livingEntity) {
         return 24;
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
-        MobEffectInstance beneficialInstance = new MobEffectInstance(getBeneficialEffect(stack), 200, 0);
-        MobEffectInstance harmfulInstance = new MobEffectInstance(getHarmfulEffect(stack), 200, 0);
+    public void appendHoverText(ItemStack itemStack, TooltipContext tooltipContext, List<Component> list, TooltipFlag tooltipFlag) {
+        MobEffectInstance beneficialInstance = new MobEffectInstance(getBeneficialEffect(itemStack), 200, 0);
+        MobEffectInstance harmfulInstance = new MobEffectInstance(getHarmfulEffect(itemStack), 200, 0);
         List<MobEffectInstance> effectList = new ArrayList<>();
         effectList.add(beneficialInstance);
         effectList.add(harmfulInstance);
-        PotionUtils.addPotionTooltip(effectList, tooltip, 1.0F);
+        PotionContents.addPotionTooltip(effectList, list::add, 1.0F, tooltipContext.tickRate());
     }
 
-    private static MobEffect getBeneficialEffect(ItemStack stack) {
-        if (stack.getOrCreateTag().get("beneficialEffect") == null) {
-            stack.getOrCreateTag().putString("beneficialEffect", "minecraft:speed");
-        }
+    private static Holder<MobEffect> getBeneficialEffect(ItemStack stack) {
+//        if (stack.getOrCreateTag().get("beneficialEffect") == null) {
+//            stack.getOrCreateTag().putString("beneficialEffect", "minecraft:speed");
+//        }
 
-        ResourceLocation effectLocation = new ResourceLocation(stack.getOrCreateTag().getString("beneficialEffect"));
+//        ResourceLocation effectLocation = new ResourceLocation(stack.getOrCreateTag().getString("beneficialEffect"));
 
-        return Objects.requireNonNull(ForgeRegistries.MOB_EFFECTS.getValue(effectLocation));
+//        return Objects.requireNonNull(ForgeRegistries.MOB_EFFECTS.getValue(effectLocation));
     }
 
-    private static MobEffect getHarmfulEffect(ItemStack stack) {
-        if (stack.getOrCreateTag().get("harmfulEffect") == null) {
-            stack.getOrCreateTag().putString("harmfulEffect", "minecraft:poison");
-        }
-
-        ResourceLocation effectLocation = new ResourceLocation(stack.getOrCreateTag().getString("harmfulEffect"));
-
-        return Objects.requireNonNull(ForgeRegistries.MOB_EFFECTS.getValue(effectLocation));
+    private static Holder<MobEffect> getHarmfulEffect(ItemStack stack) {
+//        if (stack.getOrCreateTag().get("harmfulEffect") == null) {
+//            stack.getOrCreateTag().putString("harmfulEffect", "minecraft:poison");
+//        }
+//
+//        ResourceLocation effectLocation = new ResourceLocation(stack.getOrCreateTag().getString("harmfulEffect"));
+//
+//        return Objects.requireNonNull(ForgeRegistries.MOB_EFFECTS.getValue(effectLocation));
     }
 
-    public static int getEffectColours(ItemStack stack, int tintIndex) {
-        Color effectColor;
-        if (tintIndex == 1) {
-            effectColor = new Color(0xFF000000 | getBeneficialEffect(stack).getColor());
-        }
-        else {
-            effectColor = new Color(0xFF000000 | getHarmfulEffect(stack).getColor()).brighter();
-        }
-        return effectColor.getRGB();
-    }
+//    TODO: Venom Vial Item Tint Source
+
+//    public static int getEffectColours(ItemStack stack, int tintIndex) {
+//        Color effectColor;
+//        if (tintIndex == 1) {
+//            effectColor = new Color(0xFF000000 | getBeneficialEffect(stack).getColor());
+//        }
+//        else {
+//            effectColor = new Color(0xFF000000 | getHarmfulEffect(stack).getColor()).brighter();
+//        }
+//        return effectColor.getRGB();
+//    }
 }

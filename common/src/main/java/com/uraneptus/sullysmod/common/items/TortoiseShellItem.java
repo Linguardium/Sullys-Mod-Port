@@ -1,15 +1,16 @@
 package com.uraneptus.sullysmod.common.items;
 
 import com.uraneptus.sullysmod.common.entities.TortoiseShell;
-import com.uraneptus.sullysmod.core.other.SMItemUtil;
 import com.uraneptus.sullysmod.core.registry.SMEntityTypes;
 import com.uraneptus.sullysmod.core.registry.SMSounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.dispenser.OptionalDispenseItemBehavior;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -31,16 +32,16 @@ public class TortoiseShellItem extends Item {
         Player player = pContext.getPlayer();
         InteractionHand hand = pContext.getHand();
         level.playSound(null, player.getX(), player.getY(), player.getZ(), SMSounds.TORTOISE_SHELL_PLACE.get(), SoundSource.PLAYERS, 0.5F, 0.4F / (level.getRandom().nextFloat() * 0.4F + 0.8F));
-        player.getCooldowns().addCooldown(this, 20);
+        player.getCooldowns().addCooldown(itemstack, 20);
         player.swing(hand);
-        if (!level.isClientSide()) {
-            TortoiseShell shell = SMEntityTypes.TORTOISE_SHELL.get().create(level);
+        if (level instanceof ServerLevel serverLevel) {
+            TortoiseShell shell = SMEntityTypes.TORTOISE_SHELL.get().create(serverLevel, EntitySpawnReason.SPAWN_ITEM_USE);
             shell.moveTo(blockpos.getX() + 0.5, blockpos.getY() + 1, blockpos.getZ() + 0.5, player.getYRot(), 0.0F);
             level.addFreshEntity(shell);
             level.broadcastEntityEvent(shell, (byte) 3);
         }
         player.awardStat(Stats.ITEM_USED.get(this));
-        SMItemUtil.nonCreativeShrinkStack(player, itemstack);
+        itemstack.consume(1, player);
 
         return InteractionResult.CONSUME;
     }
