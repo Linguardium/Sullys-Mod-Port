@@ -1,25 +1,25 @@
 package com.uraneptus.sullysmod.common.items;
 
+import com.uraneptus.sullysmod.common.components.VenomDataComponent;
+import com.uraneptus.sullysmod.core.registry.SMItemDataComponentTypes;
 import com.uraneptus.sullysmod.core.registry.SMSounds;
 import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
-import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class VenomVialItem extends Item {
@@ -27,19 +27,25 @@ public class VenomVialItem extends Item {
         super(properties);
     }
 
-    // TODO: Venom item data component
-
     @Override
-    public ItemStack getDefaultInstance() {
+    public @NotNull ItemStack getDefaultInstance() {
         ItemStack stack = super.getDefaultInstance();
-//        stack.getOrCreateTag().putString("beneficialEffect", "minecraft:speed");
-//        stack.getOrCreateTag().putString("harmfulEffect", "minecraft:poison");
+        stack.set(SMItemDataComponentTypes.VENOM_DATA_COMPONENT.get(),
+                VenomDataComponent.EMPTY
+                        .withBeneficial(MobEffects.MOVEMENT_SPEED, 200, 0)
+                        .withHarmful(MobEffects.POISON, 200, 0)
+        );
         return stack;
     }
 
     @Override
     public InteractionResult use(Level level, Player player, InteractionHand hand) {
         return ItemUtils.startUsingInstantly(level, player, hand);
+    }
+
+    private void applyEffectsToLivingEntity(ItemStack stack, LivingEntity target, @Nullable Entity sourceEntity) {
+        VenomDataComponent venom = stack.getOrDefault(SMItemDataComponentTypes.VENOM_DATA_COMPONENT.get(), VenomDataComponent.EMPTY);
+        venom.applyToLivingEntity(200, 0, target,sourceEntity);
     }
 
     @Override
@@ -50,25 +56,14 @@ public class VenomVialItem extends Item {
             CriteriaTriggers.CONSUME_ITEM.trigger(serverPlayer, stack);
         }
 
-        if (level instanceof ServerLevel serverLevel) {
-            MobEffectInstance beneficialInstance = new MobEffectInstance(getBeneficialEffect(stack), 200, 0);
-            MobEffectInstance harmfulInstance = new MobEffectInstance(getHarmfulEffect(stack), 200, 0);
+        // change in behavior. original passed null if it wasnt a player causing the effect
+        applyEffectsToLivingEntity(stack, livingEntity, livingEntity);
 
-            if (getBeneficialEffect(stack).value().isInstantenous()) {
-                beneficialInstance.getEffect().value().applyInstantenousEffect(serverLevel, player, player, livingEntity, beneficialInstance.getAmplifier(), 1.0D);
-            }
-            else livingEntity.addEffect(beneficialInstance);
-
-            if (getHarmfulEffect(stack).value().isInstantenous()) {
-                harmfulInstance.getEffect().value().applyInstantenousEffect(serverLevel, player, player, livingEntity, harmfulInstance.getAmplifier(), 1.0D);
-            }
-            else livingEntity.addEffect(harmfulInstance);
-        }
+        stack.consume(1, player);
 
         if (player != null) {
             player.awardStat(Stats.ITEM_USED.get(this));
-            if (!player.getAbilities().instabuild) {
-                stack.shrink(1);
+            if (!player.isCreative()) {
                 level.playSound(null, livingEntity.getOnPos(), SMSounds.VIAL_SHATTERS.get(), SoundSource.NEUTRAL, 1.0F, 1.0F);
             }
         }
@@ -79,7 +74,7 @@ public class VenomVialItem extends Item {
     }
 
     @Override
-    public ItemUseAnimation getUseAnimation(ItemStack pStack) {
+    public @NotNull ItemUseAnimation getUseAnimation(ItemStack pStack) {
         return ItemUseAnimation.DRINK;
     }
 
@@ -90,32 +85,7 @@ public class VenomVialItem extends Item {
 
     @Override
     public void appendHoverText(ItemStack itemStack, TooltipContext tooltipContext, List<Component> list, TooltipFlag tooltipFlag) {
-        MobEffectInstance beneficialInstance = new MobEffectInstance(getBeneficialEffect(itemStack), 200, 0);
-        MobEffectInstance harmfulInstance = new MobEffectInstance(getHarmfulEffect(itemStack), 200, 0);
-        List<MobEffectInstance> effectList = new ArrayList<>();
-        effectList.add(beneficialInstance);
-        effectList.add(harmfulInstance);
-        PotionContents.addPotionTooltip(effectList, list::add, 1.0F, tooltipContext.tickRate());
-    }
-
-    private static Holder<MobEffect> getBeneficialEffect(ItemStack stack) {
-//        if (stack.getOrCreateTag().get("beneficialEffect") == null) {
-//            stack.getOrCreateTag().putString("beneficialEffect", "minecraft:speed");
-//        }
-
-//        ResourceLocation effectLocation = new ResourceLocation(stack.getOrCreateTag().getString("beneficialEffect"));
-
-//        return Objects.requireNonNull(ForgeRegistries.MOB_EFFECTS.getValue(effectLocation));
-    }
-
-    private static Holder<MobEffect> getHarmfulEffect(ItemStack stack) {
-//        if (stack.getOrCreateTag().get("harmfulEffect") == null) {
-//            stack.getOrCreateTag().putString("harmfulEffect", "minecraft:poison");
-//        }
-//
-//        ResourceLocation effectLocation = new ResourceLocation(stack.getOrCreateTag().getString("harmfulEffect"));
-//
-//        return Objects.requireNonNull(ForgeRegistries.MOB_EFFECTS.getValue(effectLocation));
+        itemStack.getOrDefault(SMItemDataComponentTypes.VENOM_DATA_COMPONENT.get(), VenomDataComponent.EMPTY).addToTooltip(tooltipContext,list::add,tooltipFlag);
     }
 
 //    TODO: Venom Vial Item Tint Source

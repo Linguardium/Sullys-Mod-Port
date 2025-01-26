@@ -1,6 +1,6 @@
 package com.uraneptus.sullysmod.common.entities.group_spawn_data;
 
-import com.uraneptus.sullysmod.common.entities.components.JungleSpiderEffectData;
+import com.uraneptus.sullysmod.common.components.VenomDataComponent;
 import com.uraneptus.sullysmod.core.other.tags.SMMobEffectTags;
 import net.minecraft.Util;
 import net.minecraft.core.Holder;
@@ -15,17 +15,22 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 public class JungleSpiderSpawnGroupData extends Spider.SpiderEffectsGroupData {
-    public final JungleSpiderEffectData effectData;
-    private JungleSpiderSpawnGroupData(JungleSpiderEffectData data) {
+    public final VenomDataComponent effectData;
+    private JungleSpiderSpawnGroupData(VenomDataComponent data) {
         this.effectData = data;
     }
 
     public static JungleSpiderSpawnGroupData generate(RandomSource random) {
         Optional<Holder<MobEffect>> beneficial = chooseBeneficialEffect(random, effect->true);
         Predicate<Holder<MobEffect>> isCompatible = beneficial.map(JungleSpiderSpawnGroupData::compatibleWithPredicate).orElse(effect->true);
-
         Optional<Holder<MobEffect>> harmful = chooseHarmfulEffect(random, isCompatible);
-        return new JungleSpiderSpawnGroupData(new JungleSpiderEffectData(beneficial.orElse(null), harmful.orElse(null)));
+        VenomDataComponent component = VenomDataComponent.EMPTY;
+        if (beneficial.isEmpty()) component = component.withoutBeneficial();
+        else component = component.withBeneficial(beneficial.get(), 15, 0);
+        if (harmful.isEmpty()) component = component.withoutHarmful();
+        else component = component.withHarmful(harmful.get(), 15, 0);
+
+        return new JungleSpiderSpawnGroupData(component);
     }
 
     private static Predicate<Holder<MobEffect>> compatibleWithPredicate(Holder<MobEffect> effect1) {

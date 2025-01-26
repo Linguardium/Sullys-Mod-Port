@@ -1,7 +1,7 @@
 package com.uraneptus.sullysmod.common.entities;
 
 import com.uraneptus.sullysmod.SullysMod;
-import com.uraneptus.sullysmod.common.entities.components.JungleSpiderEffectData;
+import com.uraneptus.sullysmod.common.components.VenomDataComponent;
 import com.uraneptus.sullysmod.common.entities.group_spawn_data.JungleSpiderSpawnGroupData;
 import com.uraneptus.sullysmod.core.other.tags.SMMobEffectTags;
 import net.minecraft.core.BlockPos;
@@ -25,11 +25,9 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Optional;
-
 public class JungleSpider extends Spider {
 
-    @NotNull JungleSpiderEffectData effectData = JungleSpiderEffectData.EMPTY;
+    @NotNull VenomDataComponent effectData = VenomDataComponent.EMPTY;
     public JungleSpider(EntityType<? extends JungleSpider> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
     }
@@ -50,20 +48,14 @@ public class JungleSpider extends Spider {
         return Monster.checkMonsterSpawnRules(pType, pLevel, entitySpawnReason, pPos, pRandom);
     }
 
-    public Optional<Holder<MobEffect>> getBeneficialVenomEffect() {
-        return Optional.ofNullable(this.effectData.beneficial());
-    }
-
-    public Optional<Holder<MobEffect>> getHarmfulVenomEffect() {
-        return Optional.ofNullable(this.effectData.harmful());
-    }
-
     public void setBeneficialVenomEffect(@Nullable Holder<MobEffect> mobEffect) {
-        this.effectData = effectData.withBeneficial(mobEffect);
+        if (mobEffect == null) this.effectData = this.effectData.withoutBeneficial();
+        else this.effectData = effectData.withBeneficial(mobEffect, 200, 0);
     }
 
     public void setHarmfulVenomEffect(@Nullable Holder<MobEffect> mobEffect) {
-        this.effectData = effectData.withHarmful(mobEffect);
+        if (mobEffect == null) this.effectData = this.effectData.withoutHarmful();
+        else this.effectData = effectData.withHarmful(mobEffect, 200, 0);
     }
 
     private static boolean isEffectExtended(Holder<MobEffect> mobEffect) {
@@ -74,40 +66,35 @@ public class JungleSpider extends Spider {
         return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH, 18.0D).add(Attributes.MOVEMENT_SPEED, (double)0.3F);
     }
 
-    private static MobEffectInstance getOnHitEffect(ServerLevel level, BlockPos pos, Holder<MobEffect> mobEffect) {
-        float difficultyMultiplier = level.getCurrentDifficultyAt(pos).getEffectiveDifficulty() * 5f;
+    private int getDifficultyAdjustedEffectTime(MobEffectInstance mobEffect) {
+        if (!(this.level() instanceof ServerLevel serverLevel)) return 5;
+        float difficultyMultiplier = serverLevel.getCurrentDifficultyAt(this.blockPosition()).getEffectiveDifficulty() * 5f;
         int seconds = Mth.floor(difficultyMultiplier * 20);
-        if (isEffectExtended(mobEffect)) seconds += 5;
+        if (isEffectExtended(mobEffect.getEffect())) seconds += 5;
         if (seconds < 1) seconds = 1;
-
-        // hide effect icon on hard
-        // TODO: config for hiding effect?
-        return new MobEffectInstance(mobEffect, seconds, 0, false, false, level.getDifficulty()!=Difficulty.HARD);
+        return seconds;
     }
+
     @Override
     public boolean doHurtTarget(ServerLevel serverLevel, Entity entity) {
         if (!super.doHurtTarget(serverLevel, entity))  return false;
         if (!(entity instanceof LivingEntity livingEntity)) return true;
         if (serverLevel.getDifficulty() == Difficulty.PEACEFUL) return true;
-        getBeneficialVenomEffect()
-                .map(effect->getOnHitEffect(serverLevel, livingEntity.getOnPos(), effect))
-                .ifPresent(livingEntity::addEffect);
-        getHarmfulVenomEffect()
-                .map(effect->getOnHitEffect(serverLevel, livingEntity.getOnPos(), effect))
-                .ifPresent(livingEntity::addEffect);
+        if (effectData.beneficial() != null) effectData.applyBeneficialToLivingEntity(getDifficultyAdjustedEffectTime(effectData.beneficial()),0,livingEntity, this);
+        if (effectData.harmful() != null) effectData.applyHarmfulToLivingEntity(getDifficultyAdjustedEffectTime(effectData.harmful()),0, livingEntity, this);
         return true;
     }
 
     @Override
     public void addAdditionalSaveData(CompoundTag compoundTag) {
         super.addAdditionalSaveData(compoundTag);
-        compoundTag.put("EffectData", JungleSpiderEffectData.CODEC.codec().encodeStart(NbtOps.INSTANCE, this.effectData).getOrThrow());
+        compoundTag.put("EffectData", VenomDataComponent.CODEC.codec().encodeStart(NbtOps.INSTANCE, this.effectData).getOrThrow());
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag compoundTag) {
         super.readAdditionalSaveData(compoundTag);
-        JungleSpiderEffectData.CODEC.codec().parse(NbtOps.INSTANCE, compoundTag.getCompound("EffectData")).ifError(e->SullysMod.LOGGER.error(e.message())).ifSuccess(data->this.effectData = data);
+        VenomDataComponent.CODEC.codec().parse(NbtOps.INSTANCE, compoundTag.getCompound("EffectData")).ifError(e->SullysMod.LOGGER.error(e.message())).ifSuccess(data->this.effectData = data);
     }
 // TODO: entity dimensions
 //    @Override
