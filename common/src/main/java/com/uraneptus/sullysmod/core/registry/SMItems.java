@@ -1,10 +1,7 @@
 package com.uraneptus.sullysmod.core.registry;
 
 import com.uraneptus.sullysmod.common.items.*;
-import com.uraneptus.sullysmod.core.other.SMArmorMaterials;
-import com.uraneptus.sullysmod.core.other.SMProperties;
-import com.uraneptus.sullysmod.core.other.SMTextDefinitions;
-import com.uraneptus.sullysmod.core.other.SMTextUtil;
+import com.uraneptus.sullysmod.core.other.*;
 import dev.architectury.core.item.ArchitecturyBucketItem;
 import dev.architectury.core.item.ArchitecturySpawnEggItem;
 import dev.architectury.registry.registries.RegistrySupplier;
@@ -21,7 +18,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.MobBucketItem;
 import net.minecraft.world.level.material.Fluids;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +30,7 @@ import static com.uraneptus.sullysmod.core.registry.SMRegistries.ITEMS;
 
 public class SMItems {
     // TODO: Move autotranslate to datagen classes and stub out if not running datagen
-    public static List<RegistrySupplier<? extends Item>> AUTO_TRANSLATE = new ArrayList<>();
+    public static List<RegistrySupplier<? extends Item>> AUTO_TRANSLATE = new DatagenDependentArrayList<>();
 
     //We have this here so KubeJS can access it!
     // TODO: ANCIENT Rarity

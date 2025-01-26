@@ -1,14 +1,8 @@
 package com.uraneptus.sullysmod.client.particles;
 
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.particle.Particle;
-import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.SimpleAnimatedParticle;
 import net.minecraft.client.particle.SpriteSet;
-import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("unused")
 public class BlotEyesParticle extends SimpleAnimatedParticle {
@@ -41,17 +35,17 @@ public class BlotEyesParticle extends SimpleAnimatedParticle {
             }
         }
     }
-
-    @OnlyIn(Dist.CLIENT)
-    public static class Factory implements ParticleProvider<SimpleParticleType> {
-        private final SpriteSet spriteProvider;
-
-        public Factory(SpriteSet spriteProvider) {
-            this.spriteProvider = spriteProvider;
-        }
-
-        public Particle createParticle(@NotNull SimpleParticleType defaultParticleType, @NotNull ClientLevel clientWorld, double d, double e, double f, double g, double h, double i) {
-            return new BlotEyesParticle(clientWorld, d, e, f, this.spriteProvider);
-        }
-    }
+//
+//    @OnlyIn(Dist.CLIENT)
+//    public static class Factory implements ParticleProvider<SimpleParticleType> {
+//        private final SpriteSet spriteProvider;
+//
+//        public Factory(SpriteSet spriteProvider) {
+//            this.spriteProvider = spriteProvider;
+//        }
+//
+//        public Particle createParticle(@NotNull SimpleParticleType defaultParticleType, @NotNull ClientLevel clientWorld, double d, double e, double f, double g, double h, double i) {
+//            return new BlotEyesParticle(clientWorld, d, e, f, this.spriteProvider);
+//        }
+//    }
 }

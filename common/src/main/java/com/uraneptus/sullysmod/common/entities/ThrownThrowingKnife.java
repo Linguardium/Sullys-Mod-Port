@@ -34,7 +34,11 @@ public class ThrownThrowingKnife extends AbstractArrow {
     }
 
     public ThrownThrowingKnife(Level pLevel, double pX, double pY, double pZ) {
-        super(SMEntityTypes.THROWN_THROWING_KNIFE.get(), pX, pY, pZ, pLevel, knifeItem.copy(), knifeItem.copy());
+        this(pLevel, pX, pY, pZ, knifeItem.copy());
+    }
+
+    public ThrownThrowingKnife(Level pLevel, double pX, double pY, double pZ, ItemStack stack) {
+        super(SMEntityTypes.THROWN_THROWING_KNIFE.get(), pX, pY, pZ, pLevel, stack, stack);
     }
 
     @Override

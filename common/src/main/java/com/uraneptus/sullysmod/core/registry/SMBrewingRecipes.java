@@ -1,6 +1,7 @@
 package com.uraneptus.sullysmod.core.registry;
 
 import com.uraneptus.sullysmod.core.SMFeatures;
+import net.minecraft.core.Holder;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potion;
@@ -18,7 +19,7 @@ public class SMBrewingRecipes {
     }
 
     //Note: It's not possible yet to prevent potion variant recipes (splash, lingering etc), but as long as the base potion can't be made, it's fine
-    public static void registerRecipe(Potion input, Item ingredient, Potion result, SMFeatures feature) {
+    public static void registerRecipe(Holder<Potion> input, Item ingredient, Holder<Potion> result, SMFeatures feature) {
         if (SMFeatures.isEnabled(feature)) {
             PotionBrewing.addMix(input, ingredient, result);
         }

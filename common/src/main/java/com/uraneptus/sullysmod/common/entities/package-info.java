@@ -1,5 +1,0 @@
-@ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
-package com.uraneptus.sullysmod.common.entities;
-
-import net.minecraft.MethodsReturnNonnullByDefault;

@@ -9,11 +9,10 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class SMTextUtil {
-    private static Map<String, String> _TRANSLATABLES = new HashMap<>();
+    private static Map<String, String> _TRANSLATABLES = new DatagenDependentHashMap<>();
 
     public static MutableComponent addTranslatable(String translatable, String translation) {
         _TRANSLATABLES.put(translatable, translation);

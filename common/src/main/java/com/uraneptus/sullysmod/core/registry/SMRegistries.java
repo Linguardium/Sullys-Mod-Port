@@ -12,6 +12,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
@@ -50,6 +51,7 @@ public class SMRegistries {
     public static final Registrar<LootItemConditionType> LOOT_CONDITION_TYPES = MANAGER.get().get(Registries.LOOT_CONDITION_TYPE);
     public static final Registrar<ParticleType<?>> PARTICLE_TYPES = MANAGER.get().get(Registries.PARTICLE_TYPE);
     public static final Registrar<DataComponentType<?>> DATA_COMPONENT_TYPES = MANAGER.get().get(Registries.DATA_COMPONENT_TYPE);
+    public static final Registrar<CreativeModeTab> CREATIVE_MODE_TABS = MANAGER.get().get(Registries.CREATIVE_MODE_TAB);
 
     public static final Registrar<SMWorkstationTypes.WorkstationType<?>> WORKSTATION_TYPES = MANAGER.get().get(WORKSTATION_TYPE_KEY);
 

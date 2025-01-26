@@ -2,6 +2,8 @@ package com.uraneptus.sullysmod.core.other;
 
 import com.uraneptus.sullysmod.core.other.tags.SMItemTags;
 import com.uraneptus.sullysmod.core.registry.SMSounds;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.food.FoodProperties;
@@ -31,7 +33,7 @@ public class SMProperties {
         public static final BlockBehaviour.Properties AMBER_BUILDING_BLOCKS = BlockBehaviour.Properties.of().strength(1.3F, 3F).mapColor(MapColor.COLOR_ORANGE).requiresCorrectToolForDrops().randomTicks().dynamicShape().forceSolidOn().isViewBlocking((state, pLevel, pos) -> true);
         public static final BlockBehaviour.Properties ITEM_STAND = BlockBehaviour.Properties.of().strength(2.0F, 6.0F).requiresCorrectToolForDrops().noOcclusion();
         public static BlockBehaviour.Properties ancientSkulls() {
-            return BlockBehaviour.Properties.of().strength(1.0F).pushReaction(PushReaction.DESTROY);
+            return BlockBehaviour.Properties.of().strength(1.0F).pushReaction(PushReaction.DESTROY).instrument(NoteBlockInstrument.CUSTOM_HEAD);
         }
 
         public static BlockBehaviour.Properties petrified() {
@@ -53,8 +55,13 @@ public class SMProperties {
         //Item Specific
         public static final Item.Properties MUSIC_DISCS = singleStack().rarity(Rarity.RARE);
         public static final Item.Properties JADE_SHIELD = jadeProperties().durability(400).attributes(createJadeShieldModifiers(-2.0f));
+        public static Item.Properties ancientSkull(Item.Properties properties, SoundEvent customSound) {
+            if (customSound == null) return properties;
+            return properties.component(DataComponents.NOTE_BLOCK_SOUND, customSound.location());
+        }
 
-        // TODO: Additional Rarities
+
+                                                   // TODO: Additional Rarities
         public static Item.Properties artifacts() {
             return new Item.Properties();//.rarity(SMItems.ANCIENT);
         }

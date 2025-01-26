@@ -10,6 +10,7 @@ import dev.architectury.core.block.ArchitecturyLiquidBlock;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import dev.architectury.registry.registries.RegistrySupplier;
 import net.minecraft.core.Direction;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.block.*;
@@ -117,7 +118,7 @@ public class SMBlocks {
     //Ancient Skulls
     public static List<Supplier<Block>> ANCIENT_SKULLS = new ArrayList<>();
     public static final Pair<RegistrySupplier<Block>, RegistrySupplier<Block>> CRACKED_ANCIENT_SKULL = registerAncientSkull(AncientSkullBlock.Types.CRACKED, "The head of a giant ancient creature, it has a noticeable amount of cracks", 43);
-    public static final Pair<RegistrySupplier<Block>, RegistrySupplier<Block>> CRESTED_ANCIENT_SKULL = registerAncientSkull(AncientSkullBlock.Types.CRESTED, "The large head of a now extinct animal, the beak seems more hollow than others", 40);
+    public static final Pair<RegistrySupplier<Block>, RegistrySupplier<Block>> CRESTED_ANCIENT_SKULL = registerAncientSkull(AncientSkullBlock.Types.CRESTED, SMSounds.NOTE_BLOCK_CRESTED_SKULL, "The large head of a now extinct animal, the beak seems more hollow than others", 40);
     public static final Pair<RegistrySupplier<Block>, RegistrySupplier<Block>> FLATBILLED_ANCIENT_SKULL = registerAncientSkull(AncientSkullBlock.Types.FLATBILLED, "The head of an animal that went extinct long ago", 37);
     public static final Pair<RegistrySupplier<Block>, RegistrySupplier<Block>> GIGANTIC_ANCIENT_SKULL = registerAncientSkull(AncientSkullBlock.Types.GIGANTIC, "The gigantic head of an ancient creature, it feels familiar", 43);
     public static final Pair<RegistrySupplier<Block>, RegistrySupplier<Block>> HORNED_ANCIENT_SKULL = registerAncientSkull(AncientSkullBlock.Types.HORNED, "The head of an extinct creature with a broken off horn on its head", 36);
@@ -127,13 +128,13 @@ public class SMBlocks {
     public static final Pair<RegistrySupplier<Block>, RegistrySupplier<Block>> RIBBED_ANCIENT_SKULL = registerAncientSkull(AncientSkullBlock.Types.RIBBED, "Has a small ribcage directly attached to the skull", 37);
     public static final Pair<RegistrySupplier<Block>, RegistrySupplier<Block>> UNICORN_ANCIENT_SKULL = registerAncientSkull(AncientSkullBlock.Types.UNICORN, "A normal horse skull, but with a large horn protruding from it", 25);
 
-    public static Pair<RegistrySupplier<Block>, RegistrySupplier<Block>> registerAncientSkull(AncientSkullBlock.Types type, String description, int price) {
+    public static Pair<RegistrySupplier<Block>, RegistrySupplier<Block>> registerAncientSkull(AncientSkullBlock.Types type, RegistrySupplier<SoundEvent> noteblockInstrument, String description, int price) {
         String typeName = SMTextUtil.convertSkullTypeToString(type);
         String skullName = typeName + "_ancient_skull";
-        RegistrySupplier<Block> skull = createBlockNoItemNoLang(skullName, () -> new AncientSkullBlock(type, SMProperties.Blocks.ancientSkulls()));
+        RegistrySupplier<Block> skull = createBlockNoItemNoLang(skullName, () -> new AncientSkullBlock(type, noteblockInstrument, SMProperties.Blocks.ancientSkulls()));
         RegistrySupplier<Block> wallSkull = createBlockNoItemNoLang(typeName + "_ancient_wall_skull", () -> new AncientWallSkullBlock(type, SMProperties.Blocks.ancientSkulls().overrideLootTable(optionalBlockLoot(skull))));
         ANCIENT_SKULLS.add(skull);
-        RegistrySupplier<Item> skullItem = ITEMS.register(location(skullName), () -> new StandingAndWallBlockItem(skull.get(), wallSkull.get(), Direction.DOWN, SMProperties.Items.artifacts()));
+        RegistrySupplier<Item> skullItem = SMItems.createItem(skullName, (properties) -> new StandingAndWallBlockItem(skull.get(), wallSkull.get(), Direction.DOWN, SMProperties.Items.ancientSkull(properties, noteblockInstrument.get())), SMProperties.Items.artifacts());
         SMItems.ARTIFACT_DESC_MAP.put(skullItem, SMTextUtil.addSMTranslatable("artifact." + skullName + ".desc", description).withStyle(SMTextDefinitions.ARTIFACT_DESC_STYLE));
         SMItems.TRADES.put(skullItem, price);
 

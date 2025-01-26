@@ -2,6 +2,8 @@ package com.uraneptus.sullysmod.common.items;
 
 import com.uraneptus.sullysmod.common.entities.ThrownThrowingKnife;
 import com.uraneptus.sullysmod.core.registry.SMSounds;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Position;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
@@ -9,12 +11,15 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUseAnimation;
+import net.minecraft.world.item.ProjectileItem;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.NotNull;
 
-public class ThrowingKnifeItem extends Item {
+public class ThrowingKnifeItem extends Item implements ProjectileItem {
 
     public ThrowingKnifeItem(Properties pProperties) {
         super(pProperties);
@@ -22,7 +27,7 @@ public class ThrowingKnifeItem extends Item {
 
     // TODO: custom use animation
     @Override
-    public ItemUseAnimation getUseAnimation(ItemStack pStack) {
+    public @NotNull ItemUseAnimation getUseAnimation(ItemStack pStack) {
         return ItemUseAnimation.SPEAR;
     }
 
@@ -116,8 +121,16 @@ public class ThrowingKnifeItem extends Item {
     }
 
     @Override
-    public InteractionResult use(Level pLevel, Player pPlayer, InteractionHand pHand) {
+    public @NotNull InteractionResult use(Level pLevel, Player pPlayer, InteractionHand pHand) {
         pPlayer.startUsingItem(pHand);
         return InteractionResult.CONSUME;
     }
+
+    @Override
+    public @NotNull Projectile asProjectile(Level level, Position position, ItemStack itemStack, Direction direction) {
+        ThrownThrowingKnife knife = new ThrownThrowingKnife(level, position.x(), position.y(), position.z(), itemStack);
+        knife.pickup = AbstractArrow.Pickup.ALLOWED;
+        return knife;
+    }
+
 }
