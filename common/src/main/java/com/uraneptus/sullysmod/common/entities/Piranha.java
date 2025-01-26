@@ -87,8 +87,8 @@ public class Piranha extends AbstractSchoolingFish implements NeutralMob {
         return 5;
     }
 
-    public boolean isPiranhaAngry(LivingEntity pTarget) {
-        return (isAngryAt(pTarget)
+    public boolean isPiranhaAngry(LivingEntity pTarget, ServerLevel serverLevel) {
+        return (isAngryAt(pTarget, serverLevel)
                 || pTarget.getHealth() < pTarget.getMaxHealth()
                 || pTarget.isBaby()
                 || pTarget.getType().is(SMEntityTags.PIRANHA_ALWAYS_ATTACKS)
@@ -99,8 +99,8 @@ public class Piranha extends AbstractSchoolingFish implements NeutralMob {
                 || this.boatTarget != null;
     }
 
-    public boolean piranhaAngryAtPlayer(LivingEntity target) {
-        return isAngryAt(target) || (target instanceof Player player && !player.getAbilities().instabuild) || target.getHealth() < target.getMaxHealth();
+    public boolean piranhaAngryAtPlayer(LivingEntity target, ServerLevel serverLevel) {
+            return isAngryAt(target, serverLevel) || (target instanceof Player player && ! player.getAbilities().instabuild) || target.getHealth() < target.getMaxHealth();
     }
 
     public static boolean checkPiranhaSpawnRules(EntityType<? extends WaterAnimal> entityType, ServerLevelAccessor level, EntitySpawnReason entitySpawnReason, BlockPos pos, RandomSource random) {
@@ -108,11 +108,11 @@ public class Piranha extends AbstractSchoolingFish implements NeutralMob {
     }
 
     @Override
-    protected defineSynchedData(SynchedEntityData.Builder builder) {
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
-        this.entityData.define(DATA_REMAINING_ANGER_TIME, 0);
-        this.entityData.define(HAS_BOAT_TARGET, false);
-        this.entityData.define(IS_LEAPING, false);
+        builder.define(DATA_REMAINING_ANGER_TIME, 0);
+        builder.define(HAS_BOAT_TARGET, false);
+        builder.define(IS_LEAPING, false);
     }
 
     public boolean getLeaping() {
@@ -296,8 +296,9 @@ public class Piranha extends AbstractSchoolingFish implements NeutralMob {
 
         @Override
         public boolean canUse() {
+            if (!(this.piranha.level() instanceof ServerLevel serverLevel)) return false;
             LivingEntity target = this.piranha.getTarget();
-            return super.canUse() && target != null && (target.getHealth() == target.getMaxHealth() || this.piranha.isPiranhaAngry(target)) && piranha.isInWater() && Objects.requireNonNull(piranha.getTarget()).isInWater();
+            return super.canUse() && target != null && (target.getHealth() == target.getMaxHealth() || this.piranha.isPiranhaAngry(target, serverLevel)) && piranha.isInWater() && Objects.requireNonNull(piranha.getTarget()).isInWater();
         }
 
         @Override
@@ -530,6 +531,7 @@ public class Piranha extends AbstractSchoolingFish implements NeutralMob {
 
         @Override
         public boolean canUse() {
+            if (!(this.piranha.level() instanceof ServerLevel serverLevel)) return false;
             LivingEntity target = piranha.getTarget();
             if (piranha.getRandom().nextInt(4) != 0) return false;
             if (piranha.getHealth() < (piranha.getMaxHealth() / 2)) return false;
@@ -537,7 +539,7 @@ public class Piranha extends AbstractSchoolingFish implements NeutralMob {
             if (piranha.getBlockStateOn().getFluidState().is(Fluids.WATER) || piranha.getBlockStateOn().isAir()) return false;
             if (target == null || !target.isAlive()) return false;
             if (target.getMotionDirection() != target.getDirection()) return false;
-            if (target.getHealth() == target.getMaxHealth() || !piranha.isPiranhaAngry(target)) return false;
+            if (target.getHealth() == target.getMaxHealth() || !piranha.isPiranhaAngry(target, serverLevel)) return false;
 
             boolean pathClear = isPathClear(piranha, target);
             if (!pathClear) {
@@ -619,9 +621,9 @@ public class Piranha extends AbstractSchoolingFish implements NeutralMob {
                 double d1 = Math.signum(-vec3.y) * Math.acos(d0 / vec3.length()) * (double)(180F / (float)Math.PI);
                 piranha.setXRot((float)d1);
             }
-            if (target != null && piranha.distanceTo(target) <= 2.0F) {
-                piranha.doHurtTarget(target);
-            } else if (piranha.getXRot() > 0.0F && piranha.onGround() && (float)piranha.getDeltaMovement().y != 0.0F) {
+            if (target != null && piranha.distanceTo(target) <= 2.0F && this.piranha.level() instanceof ServerLevel serverLevel) {
+                piranha.doHurtTarget(serverLevel, target);
+            } else if (piranha.isControlledByLocalInstance() && piranha.getXRot() > 0.0F && piranha.onGround() && (float)piranha.getDeltaMovement().y != 0.0F) {
                 piranha.setXRot(60.0F);
                 piranha.setTarget(null);
             }
@@ -639,11 +641,12 @@ public class Piranha extends AbstractSchoolingFish implements NeutralMob {
         @Override
         public boolean canUse() {
             LivingEntity target = piranha.getTarget();
+            if (!(this.piranha.level() instanceof ServerLevel serverLevel)) return false;
             if (!piranha.level().getFluidState(piranha.getOnPos().above()).is(Fluids.WATER)) return false;
             if (target == null || !target.isAlive()) return false;
             if (target.isInWater() || !piranha.isInWater()) return false;
             if (target.getMotionDirection() != target.getDirection()) return false;
-            if (target.getHealth() == target.getMaxHealth() || !piranha.isPiranhaAngry(target)) return false;
+            if (target.getHealth() == target.getMaxHealth() || !piranha.isPiranhaAngry(target, serverLevel)) return false;
 
             boolean pathClear = isPathClear(piranha, target);
             if (!pathClear) {
@@ -726,9 +729,9 @@ public class Piranha extends AbstractSchoolingFish implements NeutralMob {
                 double d1 = Math.signum(-vec3.y) * Math.acos(d0 / vec3.length()) * (double)(180F / (float)Math.PI);
                 piranha.setXRot((float)d1);
             }
-            if (target != null && piranha.distanceTo(target) <= 2.0F) {
-                piranha.doHurtTarget(target);
-            } else if (piranha.getXRot() > 0.0F && piranha.onGround() && (float)piranha.getDeltaMovement().y != 0.0F) {
+            if (piranha.level() instanceof ServerLevel serverLevel && target != null && piranha.distanceTo(target) <= 2.0F) {
+                piranha.doHurtTarget(serverLevel, target);
+            } else if (piranha.isControlledByLocalInstance() && piranha.getXRot() > 0.0F && piranha.onGround() && (float)piranha.getDeltaMovement().y != 0.0F) {
                 piranha.setXRot(60.0F);
                 piranha.setTarget(null);
             }

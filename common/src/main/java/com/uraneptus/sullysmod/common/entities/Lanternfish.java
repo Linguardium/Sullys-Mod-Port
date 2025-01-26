@@ -7,6 +7,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
@@ -47,9 +48,9 @@ public class Lanternfish extends AbstractFish {
         this.goalSelector.addGoal(1, new RandomSwimmingGoal(this, 1.0D, 40));
     }
 
-    protected defineSynchedData(SynchedEntityData.Builder builder) {
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
-        this.entityData.define(DATA_DARK_TICKS_REMAINING, 0);
+        builder.define(DATA_DARK_TICKS_REMAINING, 0);
     }
 
     public void addAdditionalSaveData(CompoundTag nbt) {
@@ -70,8 +71,8 @@ public class Lanternfish extends AbstractFish {
         }
     }
 
-    public boolean hurt(DamageSource pSource, float pAmount) {
-        boolean flag = super.hurt(pSource, pAmount);
+    public boolean hurtServer(ServerLevel level, DamageSource pSource, float pAmount) {
+        boolean flag = super.hurtServer(level, pSource, pAmount);
         if (flag) {
             this.setDarkTicks(100);
         }
