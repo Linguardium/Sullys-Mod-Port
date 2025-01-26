@@ -3,6 +3,7 @@ package com.uraneptus.sullysmod.core.other;
 import com.uraneptus.sullysmod.core.other.tags.SMItemTags;
 import com.uraneptus.sullysmod.core.registry.SMSounds;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.equipment.ArmorMaterial;
 import net.minecraft.world.item.equipment.ArmorType;
 import net.minecraft.world.item.equipment.EquipmentAsset;
@@ -16,12 +17,28 @@ public class SMArmorMaterials {
     public static final ResourceKey<EquipmentAsset> MINERS_HELMET_ASSETS = key(EquipmentAssets.ROOT_ID, "miners_helmet");
     public static final ResourceKey<EquipmentAsset> SMALL_DENTED_HELMET_ASSETS = key(EquipmentAssets.ROOT_ID, "miners_helmet");
     public static final ResourceKey<EquipmentAsset> LOST_CROWN_ASSETS = key(EquipmentAssets.ROOT_ID, "miners_helmet");
+    public static final ResourceKey<EquipmentAsset> JADE_ASSETS = key(EquipmentAssets.ROOT_ID, "jade");
+
+    public static final ArmorMaterial JADE = new ArmorMaterial(
+            9,
+            Map.of(
+                    ArmorType.BOOTS, 3,
+                    ArmorType.LEGGINGS, 3,
+                    ArmorType.CHESTPLATE, 5,
+                    ArmorType.HELMET, 2,
+                    ArmorType.BODY, 7
+            ),
+            0,
+            SoundEvents.ARMOR_EQUIP_DIAMOND,
+            0.0F,
+            0.0F,
+            SMItemTags.JADE_GEM,
+            JADE_ASSETS
+    );
 
     public static final ArmorMaterial MINERS_HELMET = new ArmorMaterial(
             9,
             Map.of(ArmorType.BOOTS, 1),
-        // original appears to add 1 armor to feet?
-        //                new int[]{1, 0, 0, 0},
             0,
             SMSounds.EQUIP_MINERS_HELMET,
             0.0F,

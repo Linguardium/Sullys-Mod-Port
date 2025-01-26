@@ -16,6 +16,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.WaterAnimal;
+import net.minecraft.world.item.AnimalArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.MobBucketItem;
 import net.minecraft.world.level.material.Fluids;
@@ -42,19 +43,19 @@ public class SMItems {
     //Basic Items
     public static final RegistrySupplier<Item> ROUGH_JADE = createItem("rough_jade");
     public static final RegistrySupplier<Item> JADE = createItem("jade");
-    public static final RegistrySupplier<Item> MUSIC_DISC_SCOUR = createItem("music_disc_scour", () -> new SMRecordItem(12, SMSounds.MUSIC_DISC_SCOUR, SMProperties.Items.MUSIC_DISCS, 4980), true);
-    public static final RegistrySupplier<Item> MUSIC_DISC_SUNKEN_PAST = createItem("music_disc_sunken_past", () -> new SMRecordItem(12, SMSounds.MUSIC_DISC_SUNKEN_PAST, SMProperties.Items.MUSIC_DISCS, 2700), true); //Doesn't have a feature category yet
+    public static final RegistrySupplier<Item> MUSIC_DISC_SCOUR = createItem("music_disc_scour", (properties) -> new SMRecordItem(12, SMSounds.MUSIC_DISC_SCOUR, properties, 4980), SMProperties.Items.MUSIC_DISCS,true);
+    public static final RegistrySupplier<Item> MUSIC_DISC_SUNKEN_PAST = createItem("music_disc_sunken_past", (properties) -> new SMRecordItem(12, SMSounds.MUSIC_DISC_SUNKEN_PAST, properties, 2700), SMProperties.Items.MUSIC_DISCS,true); //Doesn't have a feature category yet
     public static final RegistrySupplier<Item> TORTOISE_SCUTE = createItem("tortoise_scute");
-    public static final RegistrySupplier<Item> TORTOISE_SHELL = createItem("tortoise_shell", () -> new TortoiseShellItem(SMProperties.stacksOnce()));
-    public static final RegistrySupplier<Item> JADE_UPGRADE_SMITHING_TEMPLATE = createItem("jade_upgrade_smithing_template", JadeSmithingTemplateItem::new, true);
-    public static final RegistrySupplier<Item> GLASS_VIAL = createItem("glass_vial", () -> new VialItem(new Item.Properties()));
-    public static final RegistrySupplier<Item> VENOM_VIAL = createItem("venom_vial", () -> new VenomVialItem(new Item.Properties().stacksTo(16)), true);
-    public static final RegistrySupplier<Item> JADE_HORSE_ARMOR = createItem("jade_horse_armor", () -> new HorseArmorItem(9, "jade", jadeProperties().stacksTo(1)));
+    public static final RegistrySupplier<Item> TORTOISE_SHELL = createItem("tortoise_shell", TortoiseShellItem::new, SMProperties.stacksOnce());
+    public static final RegistrySupplier<Item> JADE_UPGRADE_SMITHING_TEMPLATE = createItem("jade_upgrade_smithing_template", JadeSmithingTemplateItem::new, new Item.Properties(), true);
+    public static final RegistrySupplier<Item> GLASS_VIAL = createItem("glass_vial", VialItem::new, new Item.Properties());
+    public static final RegistrySupplier<Item> VENOM_VIAL = createItem("venom_vial", VenomVialItem::new, new Item.Properties().stacksTo(16), true);
+    public static final RegistrySupplier<Item> JADE_HORSE_ARMOR = createItem("jade_horse_armor", (properties) -> new AnimalArmorItem(SMArmorMaterials.JADE, AnimalArmorItem.BodyType.EQUESTRIAN, SoundEvents.HORSE_ARMOR,true, properties), jadeProperties().stacksTo(1)); // 9
     public static final RegistrySupplier<Item> PIRANHA_TOOTH = createItem("piranha_tooth");
 
     //Tools
-    public static final RegistrySupplier<Item> JADE_SHIELD = createItem("jade_shield", () -> new JadeShieldItem(SMProperties.Items.JADE_SHIELD));
-    public static final RegistrySupplier<Item> THROWING_KNIFE = createItem("throwing_knife", () -> new ThrowingKnifeItem(SMProperties.Items.sixteenStack()));
+    public static final RegistrySupplier<Item> JADE_SHIELD = createItem("jade_shield", JadeShieldItem::new, SMProperties.Items.JADE_SHIELD);
+    public static final RegistrySupplier<Item> THROWING_KNIFE = createItem("throwing_knife", ThrowingKnifeItem::new, SMProperties.Items.sixteenStack());
 
     //Food
     public static final RegistrySupplier<Item> LANTERNFISH = createItem("lanternfish", new Item.Properties().food(SMProperties.Foods.LANTERNFISH_FOOD), true);
@@ -63,7 +64,7 @@ public class SMItems {
     public static final RegistrySupplier<Item> COOKED_PIRANHA = createItem("cooked_piranha", new Item.Properties().food(SMProperties.Foods.COOKED_PIRANHA_FOOD));
 
     //Buckets & Spawn Eggs
-    public static final RegistrySupplier<Item> MOLTEN_AMBER_BUCKET = createItem("molten_amber_bucket", () -> new ArchitecturyBucketItem(SMFluids.SOURCE_MOLTEN_AMBER, new Item.Properties().stacksTo(1)));
+    public static final RegistrySupplier<Item> MOLTEN_AMBER_BUCKET = createItem("molten_amber_bucket", (properties) -> new ArchitecturyBucketItem(SMFluids.SOURCE_MOLTEN_AMBER, properties), new Item.Properties().stacksTo(1));
     public static final RegistrySupplier<Item> LANTERNFISH_BUCKET = createMobBucketItem("lanternfish_bucket", SMEntityTypes.LANTERNFISH);
     public static final RegistrySupplier<Item> LANTERNFISH_SPAWN_EGG = createSpawnEggItem("lanternfish", SMEntityTypes.LANTERNFISH, 0xFCE3D3, 9306085);
     public static final RegistrySupplier<Item> TORTOISE_SPAWN_EGG = createSpawnEggItem("tortoise", SMEntityTypes.TORTOISE, 15198183, 10844478);
@@ -131,11 +132,11 @@ public class SMItems {
         return object;
     }
 
-    private static RegistrySupplier<Item> createSpawnEggItem(String name, RegistrySupplier<EntityType<? extends Mob>> supplier, int primaryColor, int secondaryColor) {
+    private static <M extends Mob> RegistrySupplier<Item> createSpawnEggItem(String name, RegistrySupplier<EntityType<M>> supplier, int primaryColor, int secondaryColor) {
         return createItem(name + "_spawn_egg", (properties) -> new ArchitecturySpawnEggItem(supplier, properties), new Item.Properties());
     }
 
-    private static RegistrySupplier<Item> createMobBucketItem(String name, Supplier<EntityType<? extends WaterAnimal>> entityType) {
+    private static <M extends WaterAnimal> RegistrySupplier<Item> createMobBucketItem(String name, Supplier<EntityType<M>> entityType) {
         return createItem(name, (settings) -> new MobBucketItem(entityType.get(), Fluids.WATER, SoundEvents.BUCKET_EMPTY_FISH, settings), SMProperties.Items.singleStack(), true);
     }
 

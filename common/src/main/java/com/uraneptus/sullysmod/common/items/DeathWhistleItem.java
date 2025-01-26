@@ -2,7 +2,6 @@ package com.uraneptus.sullysmod.common.items;
 
 import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableList;
-import com.uraneptus.sullysmod.core.other.SMProperties;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
@@ -29,8 +28,8 @@ public class DeathWhistleItem extends Item {
                     .collect(Collectors.toList())
             ));
 
-    public DeathWhistleItem() {
-        super(SMProperties.Items.artifacts());
+    public DeathWhistleItem(Item.Properties properties) {
+        super(properties);
     }
 
     @Override
