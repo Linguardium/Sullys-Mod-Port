@@ -4,10 +4,12 @@
   "compatibilityLevel": "JAVA_21",
   "minVersion": "0.8",
   "client": [
+    "CustomRarity$GuiMixin"
   ],
   "mixins": [
     "BlockEntityTypeHelper",
     "BlockSetTypeHelper",
+    "CustomRarity$ItemStackMixin",
     "DamageSourcesHelper",
     "EggBlockExtension",
     "PointedDripstoneDrippingLogic",

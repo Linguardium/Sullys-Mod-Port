@@ -1,6 +1,7 @@
 package com.uraneptus.sullysmod.core.registry;
 
 import com.mojang.serialization.Codec;
+import com.uraneptus.sullysmod.common.components.RarityComponent;
 import com.uraneptus.sullysmod.common.components.VenomDataComponent;
 import dev.architectury.registry.registries.RegistrySupplier;
 import net.minecraft.core.component.DataComponentType;
@@ -13,6 +14,7 @@ import static com.uraneptus.sullysmod.core.registry.SMRegistries.DATA_COMPONENT_
 
 public class SMItemDataComponentTypes {
     public static final RegistrySupplier<DataComponentType<VenomDataComponent>> VENOM_DATA_COMPONENT = register("venom", VenomDataComponent.CODEC.codec(), VenomDataComponent.PACKET_CODEC, true);
+    public static final RegistrySupplier<DataComponentType<RarityComponent>> CUSTOM_RARITY = register("rarity", RarityComponent.CODEC, RarityComponent.PACKET_CODEC, true);
 
     private static <T> RegistrySupplier<DataComponentType<T>> register(String name, @Nullable Codec<T> codec, @Nullable StreamCodec<RegistryFriendlyByteBuf, T> packetCodec, boolean cacheEncoding) {
         DataComponentType.Builder<T> builder = DataComponentType.builder();

@@ -1,6 +1,5 @@
 package com.uraneptus.sullysmod.client.model;
 
-import com.uraneptus.sullysmod.client.animations.AnimUtil;
 import com.uraneptus.sullysmod.client.animations.PiranhaAnimation;
 import com.uraneptus.sullysmod.client.renderer.entities.renderstates.PiranhaRenderState;
 import net.minecraft.client.model.EntityModel;
@@ -50,9 +49,10 @@ public class PiranhaModel extends EntityModel<PiranhaRenderState> {
         if (!renderState.isInWater) {
             f = 1.5F;
         }
-
-        AnimUtil.animate(this, renderState.swimState, PiranhaAnimation.SWIM, renderState.ageInTicks);
-        AnimUtil.animate(this, renderState.angrySwimState, PiranhaAnimation.SWIM_ANGRY, renderState.ageInTicks);
+        this.animate(renderState.swimState, PiranhaAnimation.SWIM, renderState.ageInTicks);
+//        AnimUtil.animate(this, renderState.swimState, PiranhaAnimation.SWIM, renderState.ageInTicks);
+        this.animate(renderState.angrySwimState, PiranhaAnimation.SWIM_ANGRY, renderState.ageInTicks);
+//        AnimUtil.animate(this, renderState.angrySwimState, PiranhaAnimation.SWIM_ANGRY, renderState.ageInTicks);
 
         this.tail_fin.yRot = -f * 0.45F * Mth.sin(0.6F * renderState.ageInTicks);
     }

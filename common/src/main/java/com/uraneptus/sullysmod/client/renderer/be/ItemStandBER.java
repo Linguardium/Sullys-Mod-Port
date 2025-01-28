@@ -12,6 +12,8 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.item.ItemModelResolver;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -29,20 +31,23 @@ import org.joml.Matrix4f;
 public class ItemStandBER implements BlockEntityRenderer<ItemStandBE> {
     private final ItemRenderer itemRenderer;
     private final EntityRenderDispatcher entityRenderer;
+    private final ItemModelResolver itemModelResolver;
     private final Font font;
 
     public ItemStandBER(BlockEntityRendererProvider.Context pContext) {
         this.itemRenderer = pContext.getItemRenderer();
         this.entityRenderer = pContext.getEntityRenderer();
+        this.itemModelResolver = pContext.getItemModelResolver();
         this.font = pContext.getFont();
     }
 
     @Override
     public void render(ItemStandBE pBlockEntity, float pPartialTick, @NotNull PoseStack pPoseStack, @NotNull MultiBufferSource pBuffer, int pPackedLight, int pPackedOverlay) {
         ItemStack displayItem = pBlockEntity.getDisplayItem();
+        int id = (int)pBlockEntity.getBlockPos().asLong();
         if (displayItem.isEmpty()) return;
 
-        Component component = Component.translatable(displayItem.getHoverName().getString()).withStyle(displayItem.getRarity().getStyleModifier());
+        Component component = Component.translatable(displayItem.getHoverName().getString()).withStyle(displayItem.getRarity().color());
         pPoseStack.pushPose();
         pPoseStack.translate(0.5F, 0.56F, 0.5F);
         this.renderNameTag(pBlockEntity, component, pPoseStack, pBuffer, pPackedLight);
@@ -55,15 +60,19 @@ public class ItemStandBER implements BlockEntityRenderer<ItemStandBE> {
         int xRotDegrees = -55;
         pPoseStack.translate(0.0F, -0.130F, 0.0F);
         pPoseStack.mulPose(Axis.XP.rotationDegrees(xRotDegrees));
+
+        ItemStackRenderState renderState = new ItemStackRenderState();
+        itemModelResolver.updateForTopItem(renderState, displayItem, ItemDisplayContext.GROUND,false, pBlockEntity.getLevel(), null, id);
+
         if (displayItem.getItem() instanceof BlockItem blockItem) {
-            boolean flatTexture = !itemRenderer.getItemModelShaper().getItemModel(blockItem).isGui3d();
+            boolean flatTexture = renderState.isGui3d();
             if (flatTexture || blockItem.getBlock() instanceof AncientSkullBlock) {
                 pPoseStack.mulPose(Axis.YP.rotationDegrees(-180));
             }
         } else {
             pPoseStack.mulPose(Axis.YP.rotationDegrees(-180));
         }
-        this.itemRenderer.renderStatic(displayItem, ItemDisplayContext.GROUND, pPackedLight, OverlayTexture.NO_OVERLAY, pPoseStack, pBuffer, pBlockEntity.getLevel(), pBlockEntity.saveWithId().getId());
+        this.itemRenderer.renderStatic(displayItem, ItemDisplayContext.GROUND, pPackedLight, OverlayTexture.NO_OVERLAY, pPoseStack, pBuffer, pBlockEntity.getLevel(), id);
 
         pPoseStack.popPose();
     }

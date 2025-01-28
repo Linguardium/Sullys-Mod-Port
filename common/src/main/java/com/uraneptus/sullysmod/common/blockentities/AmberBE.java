@@ -2,9 +2,10 @@ package com.uraneptus.sullysmod.common.blockentities;
 
 import com.uraneptus.sullysmod.core.registry.SMBlockEntityTypes;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentMap;
-import net.minecraft.core.registries.Registries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.protocol.Packet;
@@ -22,6 +23,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
@@ -31,7 +33,8 @@ import static com.uraneptus.sullysmod.core.other.SMBlockStateProperties.IS_MELTE
 import static net.minecraft.core.component.DataComponents.ENTITY_DATA;
 
 public class AmberBE extends BlockEntity {
-    private CustomData stuckEntityData = CustomData.EMPTY;
+    private Entity stuckEntity = null;
+//    private CustomData stuckEntityData = CustomData.EMPTY;
 //    private boolean entityUpdated = false;
     private EntityType<?> pendingInitialSpawn = null;
 
@@ -47,21 +50,37 @@ public class AmberBE extends BlockEntity {
         }
     }
 
-    public void setStuckEntityData(CustomData value) {
-        this.stuckEntityData = value;
+//    public void setStuckEntityData(CustomData value) {
+//        this.stuckEntityData = value;
+////        this.renderEntity = value.isEmpty();
+//        this.update();
+//    }
+    public void setStuckEntityData(@Nullable Entity entity) {
+        this.stuckEntity = entity;
 //        this.renderEntity = value.isEmpty();
         this.update();
     }
+
+
     public void clearStuckEntityData() {
-        this.stuckEntityData = CustomData.EMPTY;
+        setStuckEntityData(null);
     }
+//    public void clearStuckEntityData() {
+//        this.stuckEntityData = CustomData.EMPTY;
+//    }
     public boolean hasStuckEntity() {
-        return !this.stuckEntityData.isEmpty();
+        return stuckEntity != null;
     }
+//    public boolean hasStuckEntity() {
+//        return !this.stuckEntityData.isEmpty();
+//    }
 
 
-    public CustomData getEntityStuck() {
-        return this.stuckEntityData;
+//    public CustomData getEntityStuck() {
+//        return this.stuckEntityData;
+//    }
+    public Optional<Entity> getEntityStuck() {
+        return Optional.ofNullable(this.stuckEntity);
     }
 
     public CustomData saveEntityToCustomData(Entity entity, boolean remove) {
@@ -81,68 +100,82 @@ public class AmberBE extends BlockEntity {
 
         level.setBlock(this.getBlockPos(), this.getBlockState().setValue(IS_MELTED, false), Block.UPDATE_ALL);
 
-        CustomData entityData = saveEntityToCustomData(entity, true);
-        if (entityData.isEmpty()) return;
+//        CustomData entityData = saveEntityToCustomData(entity, true);
+        if (this.hasStuckEntity()) return;
+//        if (entityData.isEmpty()) return;
 // TODO: Packet handler and EntityCap
 //        SMPacketHandler.sendMsg(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity), new MsgEntityAmberStuck(entity, true));
 //        SMEntityCap.getCapOptional(entity).ifPresent(cap -> cap.stuckInAmber = true);
-        this.stuckEntityData = entityData;
+        this.setStuckEntityData(entity);
+        entity.discard();
+
+//        this.stuckEntityData = entityData;
 //        this.entityUpdated = true;
         this.update();
     }
 
     public void releaseEntity(Level level, BlockPos pos) {
-        if (this.stuckEntityData.isEmpty()) return;
+        if (!this.hasStuckEntity()) return;
         if (!(level instanceof ServerLevel serverLevel)) return;
-        Optional.ofNullable(this.stuckEntityData.parseEntityType(level.registryAccess(), Registries.ENTITY_TYPE))
-        .ifPresent(entityType -> {
-            Entity newEntity = entityType.create(serverLevel, entity->this.stuckEntityData.update(entity::load), pos, EntitySpawnReason.EVENT, false, false);
-            if (newEntity == null) return;
-            if (newEntity instanceof ItemEntity) {
-                newEntity.setDeltaMovement(0, 0, 0);
-            }
-            newEntity.moveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
-            level.addFreshEntity(newEntity);
-        });
+
+//        Optional.ofNullable(this.stuckEntityData.parseEntityType(level.registryAccess(), Registries.ENTITY_TYPE))
+//        .ifPresent(entityType -> {
+        CompoundTag nbt = stuckEntity.saveWithoutId(new CompoundTag());
+        removeIgnoredNBT(nbt);
+        Entity newEntity = stuckEntity.getType().create(serverLevel, entity->entity.load(nbt), pos, EntitySpawnReason.EVENT, false, false);
+        if (newEntity == null) return;
+        if (newEntity instanceof ItemEntity) {
+            newEntity.setDeltaMovement(0, 0, 0);
+        }
+        newEntity.moveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
+        level.addFreshEntity(newEntity);
         this.clearStuckEntityData();
 //        SMEntityCap.getCapOptional(entity).ifPresent(cap -> {
 //            cap.stuckInAmber = false;
 //        });
 //        SMPacketHandler.sendMsg(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity), new MsgEntityAmberStuck(entity, false));
-
     }
 
     //This method only stores the entity id and is only used by Amber worldgen
     //The actual saving process for the generated entities is later done in the tick method
     public boolean storeTypeForGeneration(ResourceLocation entityType) {
-        if (!this.stuckEntityData.isEmpty()) return false;
-        CompoundTag compoundtag = new CompoundTag();
-        compoundtag.putString("id", entityType.toString());
-        this.storeEntity(CustomData.of(compoundtag));
+        if (pendingInitialSpawn != null || this.stuckEntity != null) return false;
+        Optional<Holder.Reference<EntityType<?>>> type = BuiltInRegistries.ENTITY_TYPE.get(entityType);
+        if (type.isEmpty()) return false;
+        this.pendingInitialSpawn = type.get().value();
+//        CompoundTag compoundtag = new CompoundTag();
+//        compoundtag.putString("id", entityType.toString());
+//        this.storeEntity(CustomData.of(compoundtag));
         return true;
     }
 
     public boolean storeTypeForGeneration(EntityType<?> entityType) {
         if (!entityType.canSerialize()) return false;
-        return storeTypeForGeneration(EntityType.getKey(entityType));
+        if (pendingInitialSpawn != null || this.stuckEntity != null) return false;
+        this.pendingInitialSpawn = entityType;
+        return true;
+//        return storeTypeForGeneration(EntityType.getKey(entityType));
     }
 
-    public void storeEntity(CustomData pEntityData) {
-        this.stuckEntityData = pEntityData;// new StuckEntityData(pEntityData);
+//    public void storeEntity(CustomData pEntityData) {
+//        this.stuckEntityData = pEntityData;// new StuckEntityData(pEntityData);
+//    }
+    public void storeEntity(Entity entity) {
+        this.stuckEntity = entity;// new StuckEntityData(pEntityData);
     }
-
     public void tick() {
-//        CompoundTag stuckEntity = getEntityStuck();
-        if (this.pendingInitialSpawn != null || this.level == null) return;
-        if (this.level.isClientSide()) return;
+        if (this.pendingInitialSpawn != null && this.getLevel() != null && !this.getLevel().isClientSide()) attemptInitialSpawn();
+    }
 
-        Entity entity = this.pendingInitialSpawn.create(level, EntitySpawnReason.NATURAL);;
+    private void attemptInitialSpawn() {
+        if (this.getLevel() == null) return;
+        Entity entity = this.pendingInitialSpawn.create(this.getLevel(), EntitySpawnReason.NATURAL);;
         pendingInitialSpawn = null;
         if (entity == null) return;
 
         entity.setPos(this.getBlockPos().getCenter());
         entity.setYBodyRot(Mth.randomBetween(level.random, 1, 270));
-        this.stuckEntityData = saveEntityToCustomData(entity, true);
+        this.stuckEntity = entity;
     }
 
     public void update() {
@@ -183,23 +216,47 @@ public class AmberBE extends BlockEntity {
 //        }
 //        this.renderEntity = pTag.getBoolean("RenderEntity");
 //    }
-
+    private Optional<CompoundTag> serializeStuckEntity() {
+        return this.getEntityStuck().map(entity-> {
+            String id = entity.getEncodeId();
+            if (id == null || id.isBlank()) return null;
+            CompoundTag tag = entity.saveWithoutId(new CompoundTag());
+            tag.putString("id", id);
+            return tag;
+        }).map(tag->tag.isEmpty()?null:tag);
+    }
     @Override
     protected void collectImplicitComponents(DataComponentMap.Builder builder) {
         super.collectImplicitComponents(builder);
-        builder.set(ENTITY_DATA, this.stuckEntityData);
+        serializeStuckEntity().ifPresent(entity->{
+            builder.set(ENTITY_DATA, CustomData.of(entity));
+        });
     }
 
     @Override
     protected void applyImplicitComponents(DataComponentInput dataComponentInput) {
         super.applyImplicitComponents(dataComponentInput);
-        this.stuckEntityData = dataComponentInput.getOrDefault(ENTITY_DATA, CustomData.EMPTY);
+        deserializeStuckEntity(dataComponentInput.getOrDefault(ENTITY_DATA, CustomData.EMPTY)).ifPresent(entity->{
+            this.stuckEntity = entity;
+        });
     }
-
+    private Optional<Entity> deserializeStuckEntity(CustomData data) {
+        if (data.isEmpty()) return Optional.empty();
+        ResourceLocation id = data.parseEntityId();
+        if (id == null) return Optional.empty();
+        EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.get(id).map(Holder.Reference::value).orElse(null);
+        if (type == null) return Optional.empty();
+        Entity entity = type.create(this.getLevel(), EntitySpawnReason.LOAD);
+        if (entity == null) return Optional.empty();
+        data.loadInto(entity);
+        return Optional.of(entity);
+    }
     @Override
     public void setComponents(DataComponentMap dataComponentMap) {
         super.setComponents(dataComponentMap);
-        this.stuckEntityData = dataComponentMap.getOrDefault(ENTITY_DATA, CustomData.EMPTY);
+        deserializeStuckEntity(dataComponentMap.getOrDefault(ENTITY_DATA, CustomData.EMPTY)).ifPresent(entity->{
+            this.stuckEntity = entity;
+        });
     }
 
     @Override

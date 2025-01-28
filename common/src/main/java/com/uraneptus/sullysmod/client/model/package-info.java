@@ -1,5 +1,0 @@
-@ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
-package com.uraneptus.sullysmod.client.model;
-
-import net.minecraft.MethodsReturnNonnullByDefault;
