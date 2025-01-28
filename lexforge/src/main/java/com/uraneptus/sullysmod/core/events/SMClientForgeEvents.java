@@ -23,7 +23,7 @@ public class SMClientForgeEvents {
             if (event.getBlockState().is(SMBlocks.AMBER.get())) {
                 event.setCanceled(true);
                 Minecraft mc = Minecraft.getInstance();
-                TextureAtlasSprite texture = mc.getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(SullysMod.modPrefix("block/amber"));
+                TextureAtlasSprite texture = mc.getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(location("block/amber"));
                 renderTransparentTexture(texture, event.getPoseStack());
             }
         }

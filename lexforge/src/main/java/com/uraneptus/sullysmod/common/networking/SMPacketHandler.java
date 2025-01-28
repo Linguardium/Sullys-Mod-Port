@@ -11,7 +11,7 @@ public class SMPacketHandler {
 
     public static void register() {
         final String protocolVersion = "1";
-        INSTANCE = NetworkRegistry.ChannelBuilder.named(SullysMod.modPrefix("messages"))
+        INSTANCE = NetworkRegistry.ChannelBuilder.named(location("messages"))
                 .networkProtocolVersion(() -> protocolVersion)
                 .clientAcceptedVersions(protocolVersion::equals)
                 .serverAcceptedVersions(protocolVersion::equals)

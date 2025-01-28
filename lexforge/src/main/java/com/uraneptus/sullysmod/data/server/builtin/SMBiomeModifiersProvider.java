@@ -44,6 +44,6 @@ public class SMBiomeModifiersProvider {
     }
 
     private static void register(BootstapContext<BiomeModifier> context, String name, Supplier<? extends BiomeModifier> modifier) {
-        context.register(ResourceKey.create(ForgeRegistries.Keys.BIOME_MODIFIERS, SullysMod.modPrefix(name)), modifier.get());
+        context.register(ResourceKey.create(ForgeRegistries.Keys.BIOME_MODIFIERS, location(name)), modifier.get());
     }
 }

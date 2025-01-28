@@ -3,6 +3,8 @@ package com.uraneptus.sullysmod.fabric.datagen;
 import net.fabricmc.fabric.api.datagen.v1.DataGeneratorEntrypoint;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import net.minecraft.core.RegistrySetBuilder;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,8 +20,9 @@ public final class SullysModDatagenFabric implements DataGeneratorEntrypoint {
 
     public void registerDatagenProviders(FabricDataGenerator.Pack pack) {
         pack.addProvider(SMNeoForgeDataMapProvider::new);
-        pack.addProvider(SMTranslationProviderEnUs::new);
         pack.addProvider(SMModelProvider::new);
+        pack.addProvider(SMPaintingVariantsProvider::new);
+        pack.addProvider(SMTranslationProviderEnUs::new);
     }
 
     public void registerStructureSerializer(FabricDataGenerator.Pack pack) {
@@ -66,4 +69,9 @@ public final class SullysModDatagenFabric implements DataGeneratorEntrypoint {
         registerDatagenProviders(pack);
     }
 
+    @Override
+    public void buildRegistry(RegistrySetBuilder registryBuilder) {
+        DataGeneratorEntrypoint.super.buildRegistry(registryBuilder);
+        registryBuilder.add(Registries.PAINTING_VARIANT, SMPaintingVariantsProvider::bootstrap);
+    }
 }

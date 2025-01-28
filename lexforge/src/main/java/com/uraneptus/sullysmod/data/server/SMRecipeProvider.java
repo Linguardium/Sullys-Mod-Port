@@ -467,7 +467,7 @@ public class SMRecipeProvider extends RecipeProvider {
 
     private static void conditionalRecipe(ICondition condition, RecipeCategory category, RecipeBuilder recipe, ResourceLocation customPath, Consumer<FinishedRecipe> consumer) {
         ConditionalRecipe.builder().addCondition(condition)
-                .addRecipe(consumer1 -> recipe.save(consumer1, SullysMod.modPrefix(RecipeBuilder.getDefaultRecipeId(recipe.getResult()).getPath())))
+                .addRecipe(consumer1 -> recipe.save(consumer1, location(RecipeBuilder.getDefaultRecipeId(recipe.getResult()).getPath())))
                 .generateAdvancement(new ResourceLocation(RecipeBuilder.getDefaultRecipeId(recipe.getResult()).getNamespace(), "recipes/" + category.getFolderName() + "/" + customPath.getPath()))
                 .build(consumer, customPath);
     }

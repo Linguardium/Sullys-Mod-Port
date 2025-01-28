@@ -14,8 +14,6 @@ import static com.uraneptus.sullysmod.core.registry.SMRegistries.DATA_COMPONENT_
 public class SMItemDataComponentTypes {
     public static final RegistrySupplier<DataComponentType<VenomDataComponent>> VENOM_DATA_COMPONENT = register("venom", VenomDataComponent.CODEC.codec(), VenomDataComponent.PACKET_CODEC, true);
 
-
-
     private static <T> RegistrySupplier<DataComponentType<T>> register(String name, @Nullable Codec<T> codec, @Nullable StreamCodec<RegistryFriendlyByteBuf, T> packetCodec, boolean cacheEncoding) {
         DataComponentType.Builder<T> builder = DataComponentType.builder();
         if (codec != null) builder.persistent(codec);
@@ -23,4 +21,6 @@ public class SMItemDataComponentTypes {
         if (codec != null && cacheEncoding) builder.cacheEncoding();
         return DATA_COMPONENT_TYPES.register(location(name), builder::build);
     }
+
+    public static void init() { }
 }

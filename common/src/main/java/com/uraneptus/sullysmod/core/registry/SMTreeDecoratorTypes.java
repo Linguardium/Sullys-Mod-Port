@@ -11,4 +11,6 @@ import static com.uraneptus.sullysmod.core.registry.SMRegistries.TREE_DECORATOR_
 public class SMTreeDecoratorTypes {
 
     public static final RegistrySupplier<TreeDecoratorType<PetrifiedTreeGravelDecorator>> GRAVEL_DECORATOR = TREE_DECORATOR_TYPES.register(location("petrified_gravel_decorator"), () -> TreeDecoratorTypeHelper.create(PetrifiedTreeGravelDecorator.CODEC));
+
+    public static void init() { }
 }

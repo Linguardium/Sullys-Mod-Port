@@ -2,17 +2,10 @@ package com.uraneptus.sullysmod.fabric.datagen;
 
 import com.google.common.collect.Maps;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.Encoder;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
-import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
-import net.fabricmc.fabric.api.datagen.v1.provider.FabricDynamicRegistryProvider;
-import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
@@ -22,18 +15,16 @@ import net.minecraft.data.PackOutput;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagEntry;
 import net.minecraft.tags.TagKey;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.block.Block;
 import org.apache.commons.compress.utils.Lists;
-import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.BiConsumer;
-import java.util.function.Supplier;
 
 import static net.minecraft.data.PackOutput.Target.DATA_PACK;
 
@@ -86,7 +77,7 @@ public abstract class NeoForgeDataMapProvider implements DataProvider {
                 }
                 public <T> DataMapEntryConsumer<T> createConsumer(ResourceKey<T> dataMapKey, DataMap dataMapLookup) {
 
-                    return new DataMapEntryConsumer<T>(dataMapLookup, lookup.get(dataMapKey.registryKey()).orElseThrow().value()) {
+                    return new DataMapEntryConsumer<T>(dataMapLookup, lookup.lookupOrThrow(dataMapKey.registryKey())) {
 
                         @Override
                         public DataMapEntryConsumer<T> addValueEntry(T entryId, String data) {
@@ -131,7 +122,7 @@ public abstract class NeoForgeDataMapProvider implements DataProvider {
 
 
                         private String lookupEntryId(T value) {
-                            ResourceLocation id = this.lookup.getKey(value);
+                            ResourceLocation id = lookup.listElements().filter(h->h.value().equals(value)).findFirst().map(h->h.key().location()).orElse(null);
                             if (id == null)
                                 throw new IllegalArgumentException("entry not found in registry: " + value.toString());
                             return id.toString();
@@ -191,8 +182,8 @@ public abstract class NeoForgeDataMapProvider implements DataProvider {
 
     protected abstract class DataMapEntryConsumer<T> {
         protected DataMap dataMap;
-        protected Registry<T> lookup;
-        DataMapEntryConsumer(DataMap map, Registry<T> lookup) {
+        protected HolderLookup.RegistryLookup<T> lookup;
+        DataMapEntryConsumer(DataMap map, HolderLookup.RegistryLookup<T> lookup) {
             this.dataMap = map;
             this.lookup = lookup;
         }

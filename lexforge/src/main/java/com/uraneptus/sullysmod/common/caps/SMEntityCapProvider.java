@@ -40,7 +40,7 @@ public class SMEntityCapProvider implements ICapabilityProvider, INBTSerializabl
         public static void onAttachCapability(AttachCapabilitiesEvent<Entity> event) {
             if (event.getObject() instanceof LivingEntity) {
                 final SMEntityCapProvider provider = new SMEntityCapProvider();
-                event.addCapability(SullysMod.modPrefix("sullysmod_entity_cap"), provider);
+                event.addCapability(location("sullysmod_entity_cap"), provider);
             }
         }
     }

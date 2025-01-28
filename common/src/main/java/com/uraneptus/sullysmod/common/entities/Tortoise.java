@@ -69,7 +69,10 @@ public class Tortoise extends Animal implements WorkstationHolder {
 //    private long recordStartedTick;
 //    private int ticksSinceLastEvent;
 
-    public AbstractWorkstation<?> workstation = Empty.UNIT;
+    private AbstractWorkstation<?> workstation = Empty.UNIT;
+    public AbstractWorkstation<?> workstation() {
+        return workstation;
+    }
 
     public Tortoise(EntityType<? extends Animal> entityType, Level level) {
         super(entityType, level);

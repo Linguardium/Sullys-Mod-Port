@@ -4,6 +4,7 @@ import com.uraneptus.sullysmod.common.levelgen.PetrifiedTreeVariant;
 
 import static com.uraneptus.sullysmod.core.other.SMLocationUtil.location;
 
+// TODO: datagen?
 public class SMPetrifiedTreeVariants {
     public static final int BIG_LIMIT = 15;
     public static final int SMALL_LIMIT = 2;

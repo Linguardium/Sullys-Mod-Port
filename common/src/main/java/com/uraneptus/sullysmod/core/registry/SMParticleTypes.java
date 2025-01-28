@@ -38,4 +38,6 @@ public class SMParticleTypes {
         ResourceLocation id = location(idPath);
         return PARTICLE_TYPES.register(id, ()-> new SMAbstractParticleType<T>(mapcodecFactory, packetCodecFactory));
     }
+
+    public static void init() { }
 }

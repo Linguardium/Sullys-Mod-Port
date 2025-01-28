@@ -23,7 +23,7 @@ public class SMFeatureRecipeCondition {
 //        private final ResourceLocation location;
 //
 //        public Serializer() {
-//            this.location = SullysMod.modPrefix("mod_features");
+//            this.location = location("mod_features");
 //        }
 //
 //        @Override

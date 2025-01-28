@@ -10,13 +10,44 @@ public final class SullysMod {
 
     public static void init() {
         SMRegistries.init();
+
+        SMSounds.init();
+
+        // Blocks
         SMBlocksetTypes.init();
         SMBlockEntityTypes.init();
-        SMSounds.init();
-        SMBlocks.init();
         SMFluids.init();
-
+        SMBlocks.init();
+        //SMFluidTypes.init();
         SMBlocks.registerCauldronBlocks();
+
+        // Platform Specific
+        // SMBrewingRecipes.init();
+        // Items
+        SMItemDataComponentTypes.init();
+        SMPotions.init();
+        SMToolMaterials.init();
+        SMItems.init();
+        SMCreativeModeTabs.init();
+        SMDispenseBehaviors.register();
+
+        // Recipes
+        SMRecipeTypes.init();
+        SMRecipeSerializer.init();
+
+        // Entities
+        SMEntityTypes.init();
+        SMWorkstationTypes.init();
+
+        // Loot
+        SMLootItemConditions.init();
+
+        // Particles
+        SMParticleTypes.init();
+
+        // Worldgen
+        SMTreeDecoratorTypes.init();
+        SMFeatures.init();
         // Write common init code here.
     }
 }

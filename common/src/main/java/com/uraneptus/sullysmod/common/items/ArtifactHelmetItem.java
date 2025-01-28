@@ -33,7 +33,7 @@ public class ArtifactHelmetItem extends ArmorItem {
 //                Gui gui = minecraft.gui;
 //                GuiGraphics guiGraphics = new GuiGraphics(minecraft, minecraft.renderBuffers().bufferSource());
 //
-//                gui.renderTextureOverlay(guiGraphics, SullysMod.modPrefix("textures/misc/tinyhelmetblur.png"), 1.0F);
+//                gui.renderTextureOverlay(guiGraphics, location("textures/misc/tinyhelmetblur.png"), 1.0F);
 //            }
 //        });
 //    }

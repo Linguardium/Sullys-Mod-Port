@@ -32,7 +32,7 @@ public class SMPolishingCategory implements IRecipeCategory<GrindstonePolishingR
     private final IDrawable icon;
 
     public SMPolishingCategory(IGuiHelper helper) {
-        background = helper.createDrawable(SullysMod.modPrefix("textures/gui/jei/grindstone_polishing.png"), 0, 0, 96, 31);
+        background = helper.createDrawable(location("textures/gui/jei/grindstone_polishing.png"), 0, 0, 96, 31);
         icon = helper.createDrawableIngredient(VanillaTypes.ITEM_STACK, new ItemStack(Items.GRINDSTONE));
     }
 

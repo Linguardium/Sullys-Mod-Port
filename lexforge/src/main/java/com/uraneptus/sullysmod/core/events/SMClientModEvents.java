@@ -105,7 +105,7 @@ public class SMClientModEvents {
 
     public static void addSkull(Map<SkullBlock.Type, ResourceLocation> map) {
         for (AncientSkullBlock.Type type : AncientSkullBlock.Types.values()) {
-            map.put(type, SullysMod.modPrefix("textures/entity/ancient_skulls/" + type.toString().toLowerCase() + ".png"));
+            map.put(type, location("textures/entity/ancient_skulls/" + type.toString().toLowerCase() + ".png"));
         }
     }
 

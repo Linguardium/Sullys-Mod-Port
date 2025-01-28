@@ -25,4 +25,7 @@ public class SMWorkstationTypes {
         ResourceLocation id = location(name);
         return SMRegistries.WORKSTATION_TYPES.register(id, ()->new WorkstationType<>(id, codec, packetCodec));
     }
+
+    public static void init() { }
+
 }

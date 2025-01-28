@@ -12,7 +12,17 @@ public class WarmingFluidAttributes extends SimpleArchitecturyFluidAttributes {
     private Integer warmSlope;
     private Integer warmTickDelay;
 
-    public WarmingFluidAttributes(Supplier<? extends Fluid> flowingFluid, Supplier<? extends Fluid> sourceFluid) {
+    public static WarmingFluidAttributes ofSupplier(Supplier<? extends Supplier<? extends Fluid>> flowingFluid, Supplier<? extends Supplier<? extends Fluid>> sourceFluid) {
+        return WarmingFluidAttributes.of(() -> flowingFluid.get().get(), () -> sourceFluid.get().get());
+    }
+
+
+    public static WarmingFluidAttributes of(Supplier<? extends Fluid> flowingFluid, Supplier<? extends Fluid> sourceFluid) {
+        return new WarmingFluidAttributes(flowingFluid, sourceFluid);
+    }
+
+
+    private WarmingFluidAttributes(Supplier<? extends Fluid> flowingFluid, Supplier<? extends Fluid> sourceFluid) {
         super(flowingFluid, sourceFluid);
     }
 

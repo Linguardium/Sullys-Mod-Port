@@ -47,6 +47,11 @@ public class ThrownThrowingKnife extends AbstractArrow {
     }
 
     @Override
+    public ItemStack getPickupItem() {
+        return super.getPickupItem();
+    }
+
+    @Override
     protected void onHitEntity(EntityHitResult pResult) {
         Entity entity = pResult.getEntity();
         if (entity.getType() == EntityType.ENDERMAN) return;

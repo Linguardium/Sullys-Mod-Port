@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "values": {
+    "sullysmod:copper_button": {
+      "next_oxidized_stage": "sullysmod:exposed_copper_button"
+    },
+    "sullysmod:exposed_copper_button": {
+      "next_oxidized_stage": "sullysmod:weathered_copper_button"
+    },
+    "sullysmod:weathered_copper_button": {
+      "next_oxidized_stage": "sullysmod:oxidized_copper_button"
+    }
+  }
+}

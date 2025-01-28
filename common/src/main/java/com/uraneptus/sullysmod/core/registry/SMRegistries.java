@@ -14,6 +14,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.block.Block;
@@ -31,13 +32,16 @@ import static com.uraneptus.sullysmod.core.other.SMLocationUtil.location;
 
 public class SMRegistries {
 
+    public static final Supplier<RegistrarManager> MANAGER = Suppliers.memoize(() -> RegistrarManager.get(MOD_ID));
+
+
     // Modded registries
     public static final ResourceLocation WORKSTATION_TYPE_REGISTRY_ID = location("workstation_type");
     public static final ResourceKey<Registry<SMWorkstationTypes.WorkstationType<?>>> WORKSTATION_TYPE_KEY = ResourceKey.createRegistryKey(WORKSTATION_TYPE_REGISTRY_ID);
     public static final Registry<SMWorkstationTypes.WorkstationType<?>> WORKSTATION_TYPE_REGISTRY = createRegistry(WORKSTATION_TYPE_REGISTRY_ID, null, false);
+    public static final Registrar<SMWorkstationTypes.WorkstationType<?>> WORKSTATION_TYPES = MANAGER.get().get(WORKSTATION_TYPE_KEY);
 
     // Registry registrars (like deferred registries)
-    public static final Supplier<RegistrarManager> MANAGER = Suppliers.memoize(() -> RegistrarManager.get(MOD_ID));
     public static final Registrar<Item> ITEMS = MANAGER.get().get(Registries.ITEM);
     public static final Registrar<Block> BLOCKS = MANAGER.get().get(Registries.BLOCK);
     public static final Registrar<SoundEvent> SOUNDS = MANAGER.get().get(Registries.SOUND_EVENT);
@@ -52,8 +56,8 @@ public class SMRegistries {
     public static final Registrar<ParticleType<?>> PARTICLE_TYPES = MANAGER.get().get(Registries.PARTICLE_TYPE);
     public static final Registrar<DataComponentType<?>> DATA_COMPONENT_TYPES = MANAGER.get().get(Registries.DATA_COMPONENT_TYPE);
     public static final Registrar<CreativeModeTab> CREATIVE_MODE_TABS = MANAGER.get().get(Registries.CREATIVE_MODE_TAB);
+    public static final Registrar<Potion> POTIONS = MANAGER.get().get(Registries.POTION);
 
-    public static final Registrar<SMWorkstationTypes.WorkstationType<?>> WORKSTATION_TYPES = MANAGER.get().get(WORKSTATION_TYPE_KEY);
 
     public static void init() { }
 

@@ -47,11 +47,11 @@ public class SMDatagenUtil {
     }
 
     public static ResourceLocation modBlockLocation(String path) {
-        return SullysMod.modPrefix(ModelProvider.BLOCK_FOLDER + "/" + path);
+        return location(ModelProvider.BLOCK_FOLDER + "/" + path);
     }
 
     public static ResourceLocation modItemLocation(String path) {
-        return SullysMod.modPrefix(ModelProvider.ITEM_FOLDER + "/" + path);
+        return location(ModelProvider.ITEM_FOLDER + "/" + path);
     }
 
     public static ResourceLocation vanillaBlockLocation(String path) {
@@ -71,30 +71,30 @@ public class SMDatagenUtil {
     }
 
     public static ResourceLocation craftingPath(String name) {
-        return SullysMod.modPrefix("crafting/" + name);
+        return location("crafting/" + name);
     }
 
     public static ResourceLocation smeltingPath(String name) {
-        return SullysMod.modPrefix("smelting/" + name);
+        return location("smelting/" + name);
     }
 
     public static ResourceLocation blastingPath(String name) {
-        return SullysMod.modPrefix("blasting/" + name);
+        return location("blasting/" + name);
     }
 
     public static ResourceLocation smokingPath(String name) {
-        return SullysMod.modPrefix("smoking/" + name);
+        return location("smoking/" + name);
     }
 
     public static ResourceLocation campfire_cookingPath(String name) {
-        return SullysMod.modPrefix("campfire_cooking/" + name);
+        return location("campfire_cooking/" + name);
     }
 
     public static ResourceLocation stonecuttingPath(String name) {
-        return SullysMod.modPrefix("stonecutting/" + name);
+        return location("stonecutting/" + name);
     }
 
     public static ResourceLocation smithingPath(String name) {
-        return SullysMod.modPrefix("smithing/" + name);
+        return location("smithing/" + name);
     }
 }

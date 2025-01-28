@@ -5,6 +5,7 @@ import com.uraneptus.sullysmod.core.other.*;
 import dev.architectury.core.item.ArchitecturyBucketItem;
 import dev.architectury.core.item.ArchitecturySpawnEggItem;
 import dev.architectury.registry.registries.RegistrySupplier;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
@@ -46,7 +47,7 @@ public class SMItems {
     public static final RegistrySupplier<Item> JADE_UPGRADE_SMITHING_TEMPLATE = createItem("jade_upgrade_smithing_template", JadeSmithingTemplateItem::new, new Item.Properties(), true);
     public static final RegistrySupplier<Item> GLASS_VIAL = createItem("glass_vial", VialItem::new, new Item.Properties());
     public static final RegistrySupplier<Item> VENOM_VIAL = createItem("venom_vial", VenomVialItem::new, new Item.Properties().stacksTo(16), true);
-    public static final RegistrySupplier<Item> JADE_HORSE_ARMOR = createItem("jade_horse_armor", (properties) -> new AnimalArmorItem(SMArmorMaterials.JADE, AnimalArmorItem.BodyType.EQUESTRIAN, SoundEvents.HORSE_ARMOR,true, properties), jadeProperties().stacksTo(1)); // 9
+    public static final RegistrySupplier<Item> JADE_HORSE_ARMOR = createItem("jade_horse_armor", (properties) -> new AnimalArmorItem(SMArmorMaterials.JADE, AnimalArmorItem.BodyType.EQUESTRIAN, SoundEvents.HORSE_ARMOR,true, properties), jadeProperties().stacksTo(1).component(DataComponents.ENCHANTABLE, null)); // 9
     public static final RegistrySupplier<Item> PIRANHA_TOOTH = createItem("piranha_tooth");
 
     //Tools
@@ -76,11 +77,11 @@ public class SMItems {
     public static final RegistrySupplier<Item> BROKEN_VASE = registerArtifact("broken_vase", "A large piece of the side is missing", 10);
     public static final RegistrySupplier<Item> PRIMITIVE_KNIFE = registerArtifact("primitive_knife", "A small knife made from obsidian", (properties) -> new ArtifactWeaponItem(SMToolMaterials.PRIMITIVE_KNIFE, null,properties),  SMProperties.Items.artifacts().stacksTo(1), 15);
     public static final RegistrySupplier<Item> MINERS_HELMET = registerArtifact("miners_helmet", "Looks like it’s previous owner couldn’t get the candle lit anymore",
-            MinersHelmetItem::new, SMProperties.Items.artifacts().stacksTo(1), 15);
+            MinersHelmetItem::new, SMProperties.Items.artifacts().stacksTo(1).component(DataComponents.ENCHANTABLE, null), 15);
     public static final RegistrySupplier<Item> SMALL_DENTED_HELMET = registerArtifact("small_dented_helmet", "A small rusty helmet. Barely fits",
-            (properties) -> new ArtifactHelmetItem(SMArmorMaterials.SMALL_DENTED_HELMET,properties), SMProperties.Items.artifacts().stacksTo(1), 22);
+            (properties) -> new ArtifactHelmetItem(SMArmorMaterials.SMALL_DENTED_HELMET,properties), SMProperties.Items.artifacts().stacksTo(1).component(DataComponents.ENCHANTABLE, null), 22);
     public static final RegistrySupplier<Item> LOST_CROWN = registerArtifact("lost_crown", "Once belonged to the king of a now fallen kingdom",
-            (properties) -> new ArtifactHelmetItem(SMArmorMaterials.LOST_CROWN, properties), SMProperties.Items.artifacts().stacksTo(1), 30);
+            (properties) -> new ArtifactHelmetItem(SMArmorMaterials.LOST_CROWN, properties), SMProperties.Items.artifacts().stacksTo(1).component(DataComponents.ENCHANTABLE, null), 30);
     public static final RegistrySupplier<Item> JADE_AMULET = registerArtifact("jade_amulet", "A creature is carefully sculpted from the stone", 20);
     public static final RegistrySupplier<Item> PRIMITIVE_RING = registerArtifact("primitive_ring", "A roughly made metal ring", 10);
     public static final RegistrySupplier<Item> RUSTY_TOOLS = registerArtifact("rusty_tools", "Maybe their owners are still out there", 9);
@@ -165,4 +166,6 @@ public class SMItems {
         AUTO_TRANSLATE.add(item);
         return item;
     }
+
+    public static void init() { }
 }

@@ -13,6 +13,8 @@ public class SMToolMaterials {
     // 	TagKey<Item> repairItems
 
     // TODO: custom material types and values?
-    public static final ToolMaterial PRIMITIVE_KNIFE = new ToolMaterial(BlockTags.INCORRECT_FOR_WOODEN_TOOL, 20, -2.5F,5, 0, SMItemTags.UNREPAIRABLE);
-    public static final ToolMaterial GLASS = new ToolMaterial(BlockTags.INCORRECT_FOR_WOODEN_TOOL, 1, -1.2F,4, 0, SMItemTags.UNREPAIRABLE);
+    public static final ToolMaterial PRIMITIVE_KNIFE = new ToolMaterial(BlockTags.INCORRECT_FOR_WOODEN_TOOL, 20, -2.5F,5, 1, SMItemTags.UNREPAIRABLE);
+    public static final ToolMaterial GLASS = new ToolMaterial(BlockTags.INCORRECT_FOR_WOODEN_TOOL, 1, -1.2F,4, 1, SMItemTags.UNREPAIRABLE);
+
+    public static void init() { }
 }

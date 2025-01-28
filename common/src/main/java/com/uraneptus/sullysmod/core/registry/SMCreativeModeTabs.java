@@ -30,4 +30,5 @@ public class SMCreativeModeTabs {
                         .build()
 
     );
+    public static void init() {}
 }

@@ -21,7 +21,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 @SuppressWarnings("unused")
 @ParametersAreNonnullByDefault
 public class JEIPlugin implements IModPlugin {
-    private static final ResourceLocation PLUGIN_ID = SullysMod.modPrefix("jei_plugin");
+    private static final ResourceLocation PLUGIN_ID = location("jei_plugin");
 
     @Override
     public void registerCategories(IRecipeCategoryRegistration registration) {

@@ -1,0 +1,29 @@
+package com.uraneptus.sullysmod.client.model.ancient_skulls;
+
+import net.minecraft.client.model.SkullModelBase;
+import net.minecraft.client.model.geom.ModelPart;
+
+public abstract class AbstractAncientSkullModel extends SkullModelBase {
+    //private final ModelPart head;
+
+    public AbstractAncientSkullModel(ModelPart root) {
+        super(root);
+       // this.head = root.getChild("head");
+    }
+
+    @Override
+    public void setupAnim(float pMouthAnimation, float pYRot, float pXRot) {
+        this.root.yRot = pYRot * ((float)Math.PI / 180F);
+        this.root.xRot = pXRot * ((float)Math.PI / 180F);
+    }
+
+//    @Override
+//    public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
+//        poseStack.pushPose();
+//        this.head.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, alpha);
+//        poseStack.popPose();
+//    }
+
+    public abstract float headRenderScale();
+    public abstract float headRenderHeight();
+}

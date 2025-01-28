@@ -28,7 +28,7 @@ public class SMArmorMaterials {
                     ArmorType.HELMET, 2,
                     ArmorType.BODY, 7
             ),
-            0,
+            1,
             SoundEvents.ARMOR_EQUIP_DIAMOND,
             0.0F,
             0.0F,
@@ -39,7 +39,7 @@ public class SMArmorMaterials {
     public static final ArmorMaterial MINERS_HELMET = new ArmorMaterial(
             9,
             Map.of(ArmorType.BOOTS, 1),
-            0,
+            1,
             SMSounds.EQUIP_MINERS_HELMET,
             0.0F,
             0.0F,
@@ -68,7 +68,7 @@ public class SMArmorMaterials {
             9,
             Map.of(ArmorType.BOOTS, 1),
 //            new int[]{1, 0, 0, 0},
-            0,
+            1,
             SMSounds.EQUIP_SMALL_DENTED_HELMET,
             0.0F, 0.0F,
             //() -> Ingredient.of(ItemStack.EMPTY)
@@ -80,7 +80,7 @@ public class SMArmorMaterials {
             9,
             Map.of(ArmorType.BOOTS, 1),
 //            new int[]{1, 0, 0, 0},
-            0,
+            1,
             SMSounds.EQUIP_LOST_CROWN,
             0.0F, 0.0F,
 //            () -> Ingredient.of(ItemStack.EMPTY)

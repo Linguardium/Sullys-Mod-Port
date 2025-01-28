@@ -13,7 +13,7 @@ public class SMDamageTypes {
 
 // Damage types are datagenned now
 //    private static ResourceKey<DamageType> register(DamageType damageType) {
-//        ResourceKey<DamageType> key = ResourceKey.create(Registries.DAMAGE_TYPE, SullysMod.modPrefix(damageType.msgId()));
+//        ResourceKey<DamageType> key = ResourceKey.create(Registries.DAMAGE_TYPE, location(damageType.msgId()));
 //        //damageTypeMap.put(key, damageType);
 //        return key;
 //    }

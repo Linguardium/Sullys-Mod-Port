@@ -53,10 +53,13 @@ public class TortoiseShell extends Entity implements OwnableEntity, WorkstationH
 //    long recordTickCount;
 //    long recordStartedTick;
 //    int ticksSinceLastEvent;
-    AbstractWorkstation<?> workstation = Empty.UNIT;
+    private AbstractWorkstation<?> workstation = Empty.UNIT;
     public TortoiseShell(EntityType<? extends TortoiseShell> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.blocksBuilding = true;
+    }
+    public AbstractWorkstation<?> workstation() {
+        return workstation;
     }
 
     public void setOwner(LivingEntity pOwner) {

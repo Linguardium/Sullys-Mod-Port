@@ -14,5 +14,6 @@ public final class SullysModFabric implements ModInitializer {
         // Run our common setup.
         SullysMod.init();
         SMBlocksFabricEvents.registerCauldrons();
+        SMBrewingRecipesFabric.init();
     }
 }

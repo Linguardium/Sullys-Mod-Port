@@ -27,9 +27,13 @@ import org.jetbrains.annotations.Nullable;
 
 public class JungleSpider extends Spider {
 
-    @NotNull VenomDataComponent effectData = VenomDataComponent.EMPTY;
+    @NotNull private VenomDataComponent venomData = VenomDataComponent.EMPTY;
     public JungleSpider(EntityType<? extends JungleSpider> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
+    }
+
+    public VenomDataComponent venomData() {
+        return venomData;
     }
 
     @Override
@@ -38,7 +42,7 @@ public class JungleSpider extends Spider {
             spawnGroupData = JungleSpiderSpawnGroupData.generate(serverLevelAccessor.getRandom());
         }
         if (spawnGroupData instanceof JungleSpiderSpawnGroupData jungleSpiderSpawnGroupData) {
-            this.effectData = jungleSpiderSpawnGroupData.effectData;
+            this.venomData = jungleSpiderSpawnGroupData.effectData;
         }
         return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, entitySpawnReason, spawnGroupData);
     }
@@ -49,13 +53,13 @@ public class JungleSpider extends Spider {
     }
 
     public void setBeneficialVenomEffect(@Nullable Holder<MobEffect> mobEffect) {
-        if (mobEffect == null) this.effectData = this.effectData.withoutBeneficial();
-        else this.effectData = effectData.withBeneficial(mobEffect, 200, 0);
+        if (mobEffect == null) this.venomData = this.venomData.withoutBeneficial();
+        else this.venomData = venomData.withBeneficial(mobEffect, 200, 0);
     }
 
     public void setHarmfulVenomEffect(@Nullable Holder<MobEffect> mobEffect) {
-        if (mobEffect == null) this.effectData = this.effectData.withoutHarmful();
-        else this.effectData = effectData.withHarmful(mobEffect, 200, 0);
+        if (mobEffect == null) this.venomData = this.venomData.withoutHarmful();
+        else this.venomData = venomData.withHarmful(mobEffect, 200, 0);
     }
 
     private static boolean isEffectExtended(Holder<MobEffect> mobEffect) {
@@ -80,21 +84,21 @@ public class JungleSpider extends Spider {
         if (!super.doHurtTarget(serverLevel, entity))  return false;
         if (!(entity instanceof LivingEntity livingEntity)) return true;
         if (serverLevel.getDifficulty() == Difficulty.PEACEFUL) return true;
-        if (effectData.beneficial() != null) effectData.applyBeneficialToLivingEntity(getDifficultyAdjustedEffectTime(effectData.beneficial()),0,livingEntity, this);
-        if (effectData.harmful() != null) effectData.applyHarmfulToLivingEntity(getDifficultyAdjustedEffectTime(effectData.harmful()),0, livingEntity, this);
+        if (venomData.beneficial() != null) venomData.applyBeneficialToLivingEntity(getDifficultyAdjustedEffectTime(venomData.beneficial()),0,livingEntity, this);
+        if (venomData.harmful() != null) venomData.applyHarmfulToLivingEntity(getDifficultyAdjustedEffectTime(venomData.harmful()),0, livingEntity, this);
         return true;
     }
 
     @Override
     public void addAdditionalSaveData(CompoundTag compoundTag) {
         super.addAdditionalSaveData(compoundTag);
-        compoundTag.put("EffectData", VenomDataComponent.CODEC.codec().encodeStart(NbtOps.INSTANCE, this.effectData).getOrThrow());
+        compoundTag.put("EffectData", VenomDataComponent.CODEC.codec().encodeStart(NbtOps.INSTANCE, this.venomData).getOrThrow());
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag compoundTag) {
         super.readAdditionalSaveData(compoundTag);
-        VenomDataComponent.CODEC.codec().parse(NbtOps.INSTANCE, compoundTag.getCompound("EffectData")).ifError(e->SullysMod.LOGGER.error(e.message())).ifSuccess(data->this.effectData = data);
+        VenomDataComponent.CODEC.codec().parse(NbtOps.INSTANCE, compoundTag.getCompound("EffectData")).ifError(e->SullysMod.LOGGER.error(e.message())).ifSuccess(data->this.venomData = data);
     }
 // TODO: entity dimensions
 //    @Override

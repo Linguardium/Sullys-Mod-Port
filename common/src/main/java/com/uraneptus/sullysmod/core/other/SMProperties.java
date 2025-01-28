@@ -16,6 +16,9 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Optional;
 
 import static com.uraneptus.sullysmod.common.items.JadeShieldItem.createJadeShieldModifiers;
 import static net.minecraft.world.item.component.Consumables.defaultFood;
@@ -36,8 +39,10 @@ public class SMProperties {
             return BlockBehaviour.Properties.of().strength(1.0F).pushReaction(PushReaction.DESTROY).instrument(NoteBlockInstrument.CUSTOM_HEAD);
         }
 
-        public static BlockBehaviour.Properties petrified() {
-            return BlockBehaviour.Properties.of().instrument(NoteBlockInstrument.BASEDRUM).strength(2.0F, 6.0F).sound(SMSounds.PETRIFIED_WOOD).mapColor(MapColor.TERRACOTTA_ORANGE);
+        public static BlockBehaviour.Properties petrified() { return petrified(null); }
+        public static BlockBehaviour.Properties petrified(@Nullable BlockBehaviour.Properties properties) {
+            return Optional.ofNullable(properties).orElse(BlockBehaviour.Properties.of())
+                .instrument(NoteBlockInstrument.BASEDRUM).strength(2.0F, 6.0F).sound(SMSounds.PETRIFIED_WOOD).mapColor(MapColor.TERRACOTTA_ORANGE);
         }
         public static final BlockBehaviour.Properties PETRIFIED_TRAPDOOR = petrified().requiresCorrectToolForDrops().noOcclusion().isValidSpawn(SMPropertyUtil::never).strength(3.0F);
         public static final BlockBehaviour.Properties PETRIFIED_PRESSURE_PLATE = petrified().forceSolidOn().noCollission().pushReaction(PushReaction.DESTROY).strength(0.5F);

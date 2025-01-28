@@ -10,18 +10,18 @@ import net.minecraft.world.item.alchemy.Potions;
 
 public class SMBrewingRecipes {
 
-    public static void register() {
-        registerRecipe(Potions.AWKWARD, SMItems.JADE.get(), Potions.LUCK, SMFeatures.JADE);
-        registerRecipe(Potions.LUCK, Items.FERMENTED_SPIDER_EYE, SMPotions.UNLUCK.get(), SMFeatures.UNLUCK_POTION);
-        registerRecipe(Potions.AWKWARD, SMItems.TORTOISE_SCUTE.get(), SMPotions.RESISTANCE.get(), SMFeatures.RESISTANCE_POTION);
-        registerRecipe(SMPotions.RESISTANCE.get(), Items.REDSTONE, SMPotions.LONG_RESISTANCE.get(), SMFeatures.RESISTANCE_POTION);
-        registerRecipe(SMPotions.RESISTANCE.get(), Items.GLOWSTONE_DUST, SMPotions.STRONG_RESISTANCE.get(), SMFeatures.RESISTANCE_POTION);
+    public static void register(PotionBrewing.Builder builder) {
+        registerRecipe(builder, Potions.AWKWARD, SMItems.JADE.get(), Potions.LUCK, SMFeatures.JADE);
+        registerRecipe(builder, Potions.LUCK, Items.FERMENTED_SPIDER_EYE, SMPotions.UNLUCK, SMFeatures.UNLUCK_POTION);
+        registerRecipe(builder, Potions.AWKWARD, SMItems.TORTOISE_SCUTE.get(), SMPotions.RESISTANCE, SMFeatures.RESISTANCE_POTION);
+        registerRecipe(builder, SMPotions.RESISTANCE, Items.REDSTONE, SMPotions.LONG_RESISTANCE, SMFeatures.RESISTANCE_POTION);
+        registerRecipe(builder, SMPotions.RESISTANCE, Items.GLOWSTONE_DUST, SMPotions.STRONG_RESISTANCE, SMFeatures.RESISTANCE_POTION);
     }
 
     //Note: It's not possible yet to prevent potion variant recipes (splash, lingering etc), but as long as the base potion can't be made, it's fine
-    public static void registerRecipe(Holder<Potion> input, Item ingredient, Holder<Potion> result, SMFeatures feature) {
+    public static void registerRecipe(PotionBrewing.Builder builder, Holder<Potion> input, Item ingredient, Holder<Potion> result, SMFeatures feature) {
         if (SMFeatures.isEnabled(feature)) {
-            PotionBrewing.addMix(input, ingredient, result);
+            builder.addMix(input, ingredient, result);
         }
     }
 }
