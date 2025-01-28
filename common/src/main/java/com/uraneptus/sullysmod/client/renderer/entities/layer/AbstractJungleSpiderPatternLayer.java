@@ -4,12 +4,12 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.uraneptus.sullysmod.client.model.JungleSpiderModel;
 import com.uraneptus.sullysmod.client.renderer.entities.renderstates.JungleSpiderRenderState;
-import com.uraneptus.sullysmod.core.other.SMColorUtil;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.util.ARGB;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.item.alchemy.PotionContents;
 import org.jetbrains.annotations.Nullable;
@@ -37,7 +37,7 @@ public abstract class AbstractJungleSpiderPatternLayer extends RenderLayer<Jungl
     public void renderEffectLayer(MobEffectInstance instance, PoseStack poseStack, MultiBufferSource multiBufferSource, int packedLight, JungleSpiderRenderState renderState, float yRot, float xRot) {
         OptionalInt oColor = PotionContents.getColorOptional(List.of(instance));
         if (oColor.isEmpty()) return;
-        int color = SMColorUtil.brighten(oColor.getAsInt());
+        int color = ARGB.scaleRGB(oColor.getAsInt(), 2);
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.renderType());
         this.getParentModel().renderToBuffer(poseStack,vertexConsumer, packedLight, LivingEntityRenderer.getOverlayCoords(renderState, 0.0F), color);
     }
